@@ -49,7 +49,18 @@ module "local_key_vault" {
   managed_identity_object_id = "${var.managed_identity_object_id}"
 }
 
+resource "azurerm_key_vault_secret" "local_s2s_key" {
+  name         = "microservicekey-em-ccd-orchestrator"
+  value        = "${data.azurerm_key_vault_secret.s2s_key.value}"
+  key_vault_id = "${module.local_key_vault.key_vault_id}"
+}
+
 data "azurerm_application_insights" "appinsights" {
   name                = "rpa-${var.env}"
   resource_group_name = "rpa-${var.env}"
+}
+resource "azurerm_key_vault_secret" "appinsights_key" {
+  name         = "AppInsightsInstrumentationKey"
+  value        = "${data.azurerm_application_insights.appinsights.instrumentation_key}"
+  key_vault_id = "${module.local_key_vault.key_vault_id}"
 }
