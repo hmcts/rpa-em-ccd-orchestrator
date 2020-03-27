@@ -6,6 +6,7 @@ hasCooooooooooversheets: true
 hasFolderCoversheets: true
 paginationStyle: bottomRight
 pageNumberFormat: numberOfPages
+enableEmailNotification: false
 documents:
   - type: documentSet
     property: /caseDocuments

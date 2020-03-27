@@ -2,10 +2,13 @@ title: Functional tests bundle 3
 filename: bundle.pdf
 hasTableOfContents: true
 hasCoversheets: true
-sort: dateAscending
+sort:
+  field: /customDatetimeField
+  order: ascending
 hasFolderCoversheets: true
 paginationStyle: bottomRight
 pageNumberFormat: pageRange
+enableEmailNotification: false
 folders:
   - name: Folder 1
     documents:

@@ -4,6 +4,7 @@ coverpageTemplate: FL-FRM-APP-ENG-00002.docx
 hasTableOfContents: true
 hasCoversheets: true
 hasFolderCoversheets: true
+enableEmailNotification: false
 folders:
   - name: DWP
     documents:

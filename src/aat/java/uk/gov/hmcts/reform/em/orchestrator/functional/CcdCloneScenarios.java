@@ -31,9 +31,9 @@ public class CcdCloneScenarios extends BaseTest {
         JsonPath path = response.getBody().jsonPath();
 
         Assert.assertEquals(200, response.getStatusCode());
-        Assert.assertEquals("Bundle title", path.getString("data.caseBundles[0].value.title"));
+        Assert.assertEquals("CLONED_Bundle title", path.getString("data.caseBundles[0].value.title"));
         Assert.assertEquals("no", path.getString("data.caseBundles[0].value.eligibleForCloning"));
-        Assert.assertEquals("CLONED_Bundle title", path.getString("data.caseBundles[1].value.title"));
+        Assert.assertEquals("Bundle title", path.getString("data.caseBundles[1].value.title"));
         Assert.assertEquals("no", path.getString("data.caseBundles[1].value.eligibleForCloning"));
     }
 
@@ -62,11 +62,11 @@ public class CcdCloneScenarios extends BaseTest {
         JsonPath path = response.getBody().jsonPath();
 
         Assert.assertEquals(200, response.getStatusCode());
-        Assert.assertEquals("Bundle 1", path.getString("data.caseBundles[0].value.title"));
+        Assert.assertEquals("CLONED_Bundle 2", path.getString("data.caseBundles[0].value.title"));
         Assert.assertEquals("Bundle 2", path.getString("data.caseBundles[1].value.title"));
-        Assert.assertEquals("CLONED_Bundle 2", path.getString("data.caseBundles[2].value.title"));
-        Assert.assertEquals("CLONED_FilenameBundle2", path.getString("data.caseBundles[2].value.fileName"));
+        Assert.assertEquals("Bundle 1", path.getString("data.caseBundles[2].value.title"));
         Assert.assertEquals("no", path.getString("data.caseBundles[1].value.eligibleForCloning"));
+        Assert.assertEquals("CLONED_FilenameBundle2", path.getString("data.caseBundles[0].value.fileName"));
     }
 
 }

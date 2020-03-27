@@ -2,6 +2,14 @@ output "idam_api_base_uri" {
   value = "${var.idam_api_base_uri}"
 }
 
+output "open_id_api_base_uri" {
+  value = "${var.open_id_api_base_uri}"
+}
+
+output "oidc_issuer_base_uri" {
+  value = "${var.oidc_issuer_base_uri}"
+}
+
 output "s2s_base_uri" {
   value = "http://${var.s2s_url}-${local.local_env}.service.core-compute-${local.local_env}.internal"
 }

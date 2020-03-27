@@ -2,6 +2,7 @@ title: New bundle
 filename: bundle.pdf
 hasCoversheets: true
 hasTableOfContents: true
+enableEmailNotification: false
 documents:
   - type: documentSet
     property: /caseDocuments

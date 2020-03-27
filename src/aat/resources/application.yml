@@ -5,17 +5,29 @@ spring:
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  security:
+    oauth2:
+      client:
+        provider:
+          oidc:
+            issuer-uri: ${OPEN_ID_API_BASE_URI:http://localhost:5000/o}
+        registration:
+          oidc:
+            client-id: webshow
+            client-secret: ${S2S_KEY:AAAAAAAAAAAAAAAA}
 
 test:
   url: ${TEST_URL:http://localhost:8080}
 
 idam:
   api:
-    url: ${IDAM_API_BASE_URI:http://localhost:4501}
+    url: ${IDAM_API_BASE_URI:http://localhost:5000}
   client:
     id: ${OAUTH_CLIENT:webshow}
     secret: ${FUNCTIONAL_TEST_CLIENT_OAUTH_SECRET:AAAAAAAAAAAAAAAA}
     redirect_uri: ${IDAM_WEBSHOW_WHITELIST:http://localhost:8080/oauth2redirect}
+    grant_type: 'password'
+    scope: 'openid roles profile'
 
 s2s:
   api:
@@ -53,3 +65,5 @@ app-insights:
   request-component: on
   telemetry-component: on
 
+oidc:
+  issuer: ${OIDC_ISSUER_BASE_URI:http://localhost:8080/openam/oauth2/hmcts}

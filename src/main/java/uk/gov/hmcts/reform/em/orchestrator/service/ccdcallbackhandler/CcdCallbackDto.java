@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.em.orchestrator.service.ccdcallbackhandler;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import pl.touk.throwing.ThrowingFunction;
 
@@ -16,6 +17,9 @@ public class CcdCallbackDto {
     private JsonNode caseDetails;
 
     private String jwt;
+
+    @JsonIgnore
+    private Boolean enableEmailNotification;
 
     public JsonNode getCaseData() {
         return caseData;
@@ -39,6 +43,19 @@ public class CcdCallbackDto {
 
     public void setJwt(String jwt) {
         this.jwt = jwt;
+    }
+
+    @JsonIgnore
+    public Boolean getEnableEmailNotification() {
+        if (enableEmailNotification == null) {
+            return false;
+        }
+        return enableEmailNotification;
+    }
+
+    @JsonIgnore
+    public void setEnableEmailNotification(Boolean enableEmailNotification) {
+        this.enableEmailNotification = enableEmailNotification;
     }
 
     public Optional<String> getPropertyName() {
@@ -88,5 +105,13 @@ public class CcdCallbackDto {
     public String getEventId() {
         return ccdPayload != null && ccdPayload.findValue("event_id") != null
                 ? ccdPayload.findValue("event_id").asText() : null;
+    }
+
+    public String getIdentifierFromCcdPayload(String identifier) {
+        if (identifier != null) {
+            JsonNode value = ccdPayload.at(identifier);
+            return value.isMissingNode() ? "" : value.asText();
+        }
+        return "";
     }
 }

@@ -37,6 +37,8 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 }
 
 env.IDAM_API_BASE_URI = 'https://idam-api.aat.platform.hmcts.net'
+env.OPEN_ID_API_BASE_URI = 'https://idam-api.aat.platform.hmcts.net/o'
+env.OIDC_ISSUER_BASE_URI = 'https://forgerock-am.service.core-compute-idam-aat.internal:8443/openam/oauth2/hmcts'
 env.S2S_BASE_URI = 'http://rpe-service-auth-provider-aat.service.core-compute-aat.internal'
 env.IDAM_WEBSHOW_WHITELIST = 'https://em-show-aat.service.core-compute-aat.internal/oauth2/callback'
 env.EM_STITCHING_API_URL = 'http://em-stitching-aat.service.core-compute-aat.internal'
@@ -52,13 +54,12 @@ def vaultOverrides = [
 
 withPipeline(type , product, component) {
     overrideVaultEnvironments(vaultOverrides)
-    enableDockerBuild()
     loadVaultSecrets(secrets)
     installCharts()
     enableAksStagingDeployment()
     disableLegacyDeployment()
 
-    after('test') {
+    before('aat:promotion') {
         sh '''
 curl https://raw.githubusercontent.com/hmcts/reform-api-docs/master/bin/publish-swagger-docs.sh > publish-swagger-docs.sh
 sh ./publish-swagger-docs.sh

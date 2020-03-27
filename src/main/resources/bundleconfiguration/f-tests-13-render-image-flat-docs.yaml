@@ -1,0 +1,22 @@
+title: Functional test For Image Rendering
+filename: bundle.pdf
+hasTableOfContents: true
+hasCoversheets: true
+sort:
+  field: /customDatetimeField
+  order: ascending
+hasFolderCoversheets: false
+paginationStyle: topCenter
+pageNumberFormat: pageRange
+enableEmailNotification: false
+documentImage:
+  docmosisAssetId: hmcts.png
+  imageRenderingLocation: allPages
+  coordinateX: 50
+  coordinateY: 50
+  imageRendering: opaque
+documents:
+  - type: documentSet
+    property: /caseDocuments
+
+

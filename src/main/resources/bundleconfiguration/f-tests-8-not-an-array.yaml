@@ -6,6 +6,7 @@ hasCoversheets: true
 hasFolderCoversheets: true
 paginationStyle: bottomRight
 pageNumberFormat: numberOfPages
+enableEmailNotification: false
 documents:
   - type: documentSet
     property: /singleDocument

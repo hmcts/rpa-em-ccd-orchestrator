@@ -3,11 +3,10 @@ java:
     CALLBACK_DOMAIN: ${SERVICE_FQDN}
   keyVaults:
     em-ccdorc:
-      resourceGroup: em-ccd-orchestrator
+      resourceGroup: em-ccdorc
       secrets:
         - AppInsightsInstrumentationKey
         - microservicekey-em-ccd-orchestrator
   # Don't modify below here
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
-  aadIdentityName:
