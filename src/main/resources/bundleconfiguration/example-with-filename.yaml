@@ -6,6 +6,7 @@ hasCoversheets: false
 hasFolderCoversheets: true
 paginationStyle: topRight
 pageNumberFormat: numberOfPages
+enableEmailNotification: false
 folders:
   - name: Folder 1
   - name: Folder 2

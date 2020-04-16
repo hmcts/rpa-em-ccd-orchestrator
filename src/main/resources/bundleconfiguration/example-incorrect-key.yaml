@@ -1,0 +1,12 @@
+title: Bundle with filename
+filename: bundle.pdf
+coverpageTemplate: FL-FRM-APP-ENG-00002.docx
+hasTableOfContents: false
+hasCoversheets: false
+hasFolderCoversheets: true
+paginationStyles: topRight
+pageNumberFormat: numberOfPages
+enableEmailNotification: false
+folders:
+  - name: Folder 1
+  - name: Folder 2

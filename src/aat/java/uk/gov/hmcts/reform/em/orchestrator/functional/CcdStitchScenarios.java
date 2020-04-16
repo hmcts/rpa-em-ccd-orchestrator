@@ -129,4 +129,26 @@ public class CcdStitchScenarios extends BaseTest {
         Assert.assertEquals("No", path.getString("data.caseBundles[0].value.hasCoversheets"));
         Assert.assertNotNull(path.getString("data.caseBundles[0].value.stitchedDocument.document_url"));
     }
+
+    @Test
+    public void testWithImageRendering() throws IOException {
+        CcdBundleDTO bundle = testUtil.getTestBundleWithImageRendered();
+        bundle.setHasCoversheets(CcdBoolean.No);
+
+        String json = mapper.writeValueAsString(new CcdValue<>(bundle));
+        String wrappedJson = String.format("{ \"case_details\":{ \"case_data\":{ \"caseBundles\":[ %s ] } } }", json);
+
+        Response response = testUtil.authRequest()
+                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .body(wrappedJson)
+                .request("POST", testUtil.getTestUrl() + "/api/stitch-ccd-bundles");
+
+        JsonPath path = response.getBody().jsonPath();
+        Assert.assertEquals(200, response.getStatusCode());
+        Assert.assertEquals("schmcts.png", path.getString("data.caseBundles[0].value.documentImage.docmosisAssetId"));
+        Assert.assertEquals("firstPage", path.getString("data.caseBundles[0].value.documentImage.imageRenderingLocation"));
+        Assert.assertEquals("translucent", path.getString("data.caseBundles[0].value.documentImage.imageRendering"));
+        Assert.assertEquals(50, path.getInt("data.caseBundles[0].value.documentImage.coordinateX"));
+        Assert.assertEquals(50, path.getInt("data.caseBundles[0].value.documentImage.coordinateY"));
+    }
 }

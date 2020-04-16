@@ -8,6 +8,7 @@ services:
     environment:
       - SERVER_PORT=8080
       - IDAM_API_BASE_URI=https://idam-api.aat.platform.hmcts.net
+      - OPEN_ID_API_BASE_URI=https://idam-api.aat.platform.hmcts.net/o
       - S2S_BASE_URI=http://service-auth-provider-api:8080
       - APPINSIGHTS_INSTRUMENTATIONKEY=test_app
     # these environment variables are used by java-logging library

@@ -5,11 +5,13 @@ services:
   rpa-em-ccd-orchestrator:
     build:
       context: .
-    #    image: hmcts/rpa-em-ccd-orchestrator:latest
+#        image: hmcts/rpa-em-ccd-orchestrator:latest
+    container_name: ccdorc-rpa-em-ccd-orchestrator
     environment:
       - SERVER_PORT=8080
       - S2S_BASE_URI=http://service-auth-provider-api:8489
       - IDAM_API_BASE_URI=http://idam-api:8080
+      - OPEN_ID_API_BASE_URI=http://idam-api:5000/o
       - DM_STORE_APP_URL=http://dm-store:8080
       - EM_STITCHING_API_URL=http://stitching-api:8080
       - CALLBACK_DOMAIN=rpa-em-ccd-orchestrator
@@ -25,10 +27,12 @@ services:
       - REFORM_ENVIRONMENT=docker
     ports:
       - 8080:8080
-
+    depends_on:
+      - idam-api
 
   service-auth-provider-api:
     image: hmctspublic.azurecr.io/rpe/service-auth-provider:latest
+    container_name: ccdorc-service-auth-provider-api
     environment:
       - jwtKey=wThK0f0/lh3FlxFcL4xUWDMI5C1J9KyQBgXV4wseh1e5J1uYJIjvTvArHxQDrYoHJ23xFxjHkOnvNbR5dXRoxA==
 #      - Add key for any microservice that will be used: orchestrator, stitching api, doc store
@@ -52,100 +56,126 @@ services:
       - PACKAGES_NAME=service-auth-provider-api
       - PACKAGES_VERSION=unkown
       - TESTING_SUPPORT_ENABLED=true
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx512m -XX:MaxPermSize=512m
     ports:
       - 4502:8489
 
   idam-api:
-    image: hmctsprivate.azurecr.io/tidam/api:latest
+    image: hmctspublic.azurecr.io/idam/api:stable
+    container_name: ccdorc-idam-api
     healthcheck:
       interval: 10s
       timeout: 10s
       retries: 10
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://idam-database:5432/idam
-      SPRING_DATASOURCE_USERNAME: idam-username
-      SPRING_DATASOURCE_PASSWORD: idam-password
-      SPRING_MAIL_HOST: smtp-server
-      IDAM_TESTING_SUPPORT_ENABLED: "true"
-      IDAM_API_OAUTH2_CLIENT_CLIENT_SECRETS_WEBSHOW: AAAAAAAAAAAAAAAA
-      IDAM_API_OAUTH2_CLIENT_CLIENT_SECRETS_CCD_GATEWAY: AAAAAAAAAAAAAAAA
-      IDAM_API_OAUTH2_CLIENT_CLIENT_SECRETS_CCD_ADMIN: AAAAAAAAAAAAAAAA
-      IDAM_WEBSHOW_WHITELIST: http://localhost:8080/oauth2redirect
-      REFORM_SERVICE_NAME: idam-api
-      REFORM_TEAM: idam
-      REFORM_ENVIRONMENT: local
-      http_proxy:
-      https_proxy:
-      no_proxy:
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx512m -XX:MaxPermSize=512m
+      - SPRING_PROFILES_ACTIVE=local
+      - CACHING_ENABLED=false
+      - SPRING_DATA_ELASTICSEARCH_PROPERTIES_PATH_HOME=/tmp/es
+      - TESTING_SUPPORT_ENABLED=true
+      - IDAMHEALTHCHECK_AM_ENABLED=false
+      - IDAMHEALTHCHECK_IDM_ENABLED=false
+      - STRATEGIC_ADMIN_URL=http://idam-web-admin:8082
+      - STRATEGIC_WEBPUBLIC_URL=http://idam-web-public:9002
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://shared-db:5432/openidm?currentSchema=fridam
+      - SPRING_DATASOURCE_USERNAME=openidm
+      - SPRING_DATASOURCE_PASSWORD=openidm
+      - SECURITY_OAUTH2_CLIENT_CLIENTSECRET=password
+      - SECURITY_OAUTH2_CLIENT_PRE_ESTABLISHED_REDIRECT_URI=http://idam-web-public:9002/login
+      - SECURITY_OAUTH2_CLIENT_REGISTERED_REDIRECT_URI=http://idam-web-public:9002/login
+      - IDAM_SPI_FORGEROCK_AM_ROOT=http://fr-am:8080/openam
+      - IDAM_SPI_FORGEROCK_AM_TOPLEVELHOST=fr-am
+      - IDAM_SPI_FORGEROCK_AM_USERNAME=amadmin
+      - IDAM_SPI_FORGEROCK_AM_PASSWORD=Pa55word11
+      - IDAM_SPI_FORGEROCK_AM_JWKSURIFOROAUTH2CLIENTS=http://fr-am:8080/openam/oauth2/hmcts/connect/jwk_uri
+      - IDAM_SPI_FORGEROCK_IDM_ROOT=http://fr-idm:18080/openidm
+      - IDAM_SPI_FORGEROCK_IDM_USERNAME=openidm-admin
+      - IDAM_SPI_FORGEROCK_IDM_PASSWORD=openidm-admin
+      - IDAM_SPI_FORGEROCK_IDM_PIN_DEFAULTPASSWORD=BlaBlaBlackSh33p
     ports:
-      - 4501:8080
-    links:
-      - smtp-server
-      - idam-database
+      - 5000:5000
+
+  idam-web-public:
+    image: hmctspublic.azurecr.io/idam/web-public:stable
+    container_name: ccdorc-idam-web-public
+    environment:
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx512m -XX:MaxPermSize=512m
+      - STRATEGIC_SERVICE_URL=http://idam-api:5000
+    ports:
+      - 9002:8080
     depends_on:
-      - idam-database
-      - smtp-server
+      - idam-api
+
+  idam-web-admin:
+    image: hmctspublic.azurecr.io/idam/web-admin:stable
+    container_name: ccdorc-idam-web-admin
+    environment:
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx512m -XX:MaxPermSize=512m
+      - STRATEGIC_SERVICE_URL=http://idam-api:5000
+      - STRATEGIC_PUBLIC_URL=http://idam-web-public:9002
+    ports:
+      - 8082:8080
+    depends_on:
+      - idam-api
 
   smtp-server:
     image: mailhog/mailhog
+    container_name: ccdorc-smtp-server
     ports:
       - 1025:1025
       - 8025:8025
 
-  idam-database:
+  shared-database:
     image: postgres
+    container_name: ccdorc-shared-database
+    volumes:
+      - ./database:/docker-entrypoint-initdb.d
     environment:
-      - POSTGRES_USER=idam-username
-      - POSTGRES_PASSWORD=idam-password
-      - POSTGRES_DB=idam
+      - POSTGRES_MULTIPLE_DATABASES=idam,emstitch,evidence,ccd_data,ccd_user_profile,ccd_definition,ccd_definition_designer
+      - POSTGRES_USER=shared
+      - POSTGRES_PASSWORD=shared
     ports:
       - 5434:5432
 
   stitching-api:
     image: hmctspublic.azurecr.io/em/stitching:latest
+    container_name: ccdorc-stitching-api
     healthcheck:
       interval: 10s
       timeout: 10s
       retries: 10
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://stitching-db:5432/emstitch
-      - SPRING_DATASOURCE_USERNAME=emstitch
-      - SPRING_DATASOURCE_PASSWORD=emstitch
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://shared-database:5432/emstitch
+      - SPRING_DATASOURCE_USERNAME=shared
+      - SPRING_DATASOURCE_PASSWORD=shared
       - S2S_BASE_URI=http://service-auth-provider-api:8489
-      - IDAM_API_BASE_URI=http://idam-api:8080
+      - IDAM_API_BASE_URI=http://idam-api:5000
+      - OPEN_ID_API_BASE_URI=http://idam-api:5000/o
       - ENABLE_LIQUIBASE=true
       - APPINSIGHTS_INSTRUMENTATIONKEY=test-key
       - DM_STORE_APP_URL=http://dm-store:8080
       - DOCMOSIS_ACCESS_KEY=${DOCMOSIS_ACCESS_KEY}
+    dns:
+      - 172.16.0.10
+      - 172.16.0.14
     depends_on:
-      - stitching-db
+      - shared-database
       - dm-store
-    links:
-      - stitching-db
-      - dm-store
+      - idam-api
     ports:
       - 4630:8080
 
-  stitching-db:
-    image: postgres
-    restart: always
-    environment:
-      - POSTGRES_DB=emstitch
-      - POSTGRES_USER=emstitch
-      - POSTGRES_PASSWORD=emstitch
-    ports:
-      - 5678:5432
-
   dm-store:
     image: hmctspublic.azurecr.io/dm/store:latest
+    container_name: ccdorc-dm-store
     environment:
       - SERVER_PORT=8080
       - IDAM_SUPERUSER_EMAIL
       - IDAM_SECRET_KEY=AAAAAAAAAAAAAAAA
       - GOV_NOTIFY_API_KEY
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://dm-store-db:5432/evidence
-      - SPRING_DATASOURCE_USERNAME=evidence
-      - SPRING_DATASOURCE_PASSWORD=evidence
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://shared-database:5432/evidence
+      - SPRING_DATASOURCE_USERNAME=shared
+      - SPRING_DATASOURCE_PASSWORD=shared
       - SPRING_PROFILES_ACTIVE=dev
       - ENABLE_AZURE_STORAGE_CONTAINER=true
       - ENABLE_POSTGRES_BLOB_STORAGE=false
@@ -172,13 +202,10 @@ services:
       - PACKAGES_NAME=dm-store
       - PACKAGES_VERSION=unkown
       #      debug mode
-      - JAVA_OPTS=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
-    links:
-      - dm-store-db
-      - service-auth-provider-api
-      - make-container-call
+      #- JAVA_TOOL_OPTIONS=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx512m -XX:MaxPermSize=512m
     depends_on:
-      - dm-store-db
+      - shared-database
       - service-auth-provider-api
       - make-container-call
     ports:
@@ -186,7 +213,8 @@ services:
 
   make-container-call:
     image: byrnedo/alpine-curl
-    command: -XPUT --verbose http://azure-storage-emulator-azurite:10000/devstoreaccount1/hmctstestcontainer?restype=container
+    container_name: ccdorc-make-container-call
+    command: --retry 10 --retry-connrefused -XPUT --verbose http://azure-storage-emulator-azurite:10000/devstoreaccount1/hmctstestcontainer?restype=container
     links:
       - azure-storage-emulator-azurite
     depends_on:
@@ -194,6 +222,7 @@ services:
 
   azure-storage-emulator-azurite:
     image: arafato/azurite
+    container_name: ccdorc-azure-storage-emulator-azurite
     ports:
       - 10000:10000
     environment:
@@ -201,23 +230,14 @@ services:
     volumes:
       - ccd-docker-azure-blob-data:/opt/azurite/folder
 
-  dm-store-db:
-    image: postgres
-    restart: always
-    environment:
-      - POSTGRES_DB=evidence
-      - POSTGRES_USER=evidence
-      - POSTGRES_PASSWORD=evidence
-    ports:
-      - 5433:5432
-
   ccd-user-profile-api:
     image: hmctspublic.azurecr.io/ccd/user-profile-api:latest
+    container_name: ccdorc-ccd-user-profile-api
     environment:
-      USER_PROFILE_DB_HOST: rpa-em-ccd-orchestrator-shared-database
+      USER_PROFILE_DB_HOST: shared-database
       USER_PROFILE_DB_PORT: 5432
-      USER_PROFILE_DB_USERNAME: ccd
-      USER_PROFILE_DB_PASSWORD: ccd
+      USER_PROFILE_DB_USERNAME: shared
+      USER_PROFILE_DB_PASSWORD: shared
       USER_PROFILE_DB_USE_SSL: "false"
       USER_PROFILE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_definition,ccd_admin
       IDAM_S2S_URL: http://service-auth-provider-api:8489
@@ -225,26 +245,26 @@ services:
       REFORM_TEAM: ccd
       REFORM_ENVIRONMENT: local
       APPINSIGHTS_INSTRUMENTATIONKEY: key
+      JAVA_TOOL_OPTIONS: -Xms128m -Xmx512m -XX:MaxPermSize=512m
     ports:
       - 4453:4453
     depends_on:
-      - rpa-em-ccd-orchestrator-shared-database
-    links:
-      - rpa-em-ccd-orchestrator-shared-database
+      - shared-database
       - service-auth-provider-api
 
   ccd-definition-store-api:
     image: hmctspublic.azurecr.io/ccd/definition-store-api:latest
+    container_name: ccdorc-ccd-definition-store-api
     environment:
-      DEFINITION_STORE_DB_HOST: rpa-em-ccd-orchestrator-shared-database
+      DEFINITION_STORE_DB_HOST: shared-database
       DEFINITION_STORE_DB_PORT: 5432
-      DEFINITION_STORE_DB_USERNAME: ccd
-      DEFINITION_STORE_DB_PASSWORD: ccd
+      DEFINITION_STORE_DB_USERNAME: shared
+      DEFINITION_STORE_DB_PASSWORD: shared
       DEFINITION_STORE_DB_USE_SSL: "false"
       DEFINITION_STORE_IDAM_KEY: AAAAAAAAAAAAAAAA
       DEFINITION_STORE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_gw,ccd_admin
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
-      IDAM_USER_URL: http://idam-api:8080
+      IDAM_USER_URL: http://idam-api:5000
       IDAM_S2S_URL: http://service-auth-provider-api:8489
       REFORM_SERVICE_NAME: ccd-definition-store-api
       REFORM_TEAM: ccd
@@ -253,31 +273,30 @@ services:
       ELASTIC_SEARCH_ENABLED: "false"
       ELASTIC_SEARCH_HOST: "ccd-elasticsearch"
       ELASTIC_SEARCH_FAIL_ON_IMPORT: "true"
+      JAVA_TOOL_OPTIONS: -Xms128m -Xmx512m -XX:MaxPermSize=512m
     ports:
       - 4451:4451
     depends_on:
-      - rpa-em-ccd-orchestrator-shared-database
-      - ccd-user-profile-api
-    links:
-      - rpa-em-ccd-orchestrator-shared-database
+      - shared-database
       - ccd-user-profile-api
       - idam-api
       - service-auth-provider-api
 
   ccd-data-store-api:
     image: hmctspublic.azurecr.io/ccd/data-store-api:latest
+    container_name: ccdorc-ccd-data-store-api
     environment:
-      DATA_STORE_DB_HOST: rpa-em-ccd-orchestrator-shared-database
+      DATA_STORE_DB_HOST: shared-database
       DATA_STORE_DB_PORT: 5432
-      DATA_STORE_DB_USERNAME: ccd
-      DATA_STORE_DB_PASSWORD: ccd
+      DATA_STORE_DB_USERNAME: shared
+      DATA_STORE_DB_PASSWORD: shared
       DATA_STORE_DB_USE_SSL: "false"
       DATA_STORE_IDAM_KEY: AAAAAAAAAAAAAAAA
       DATA_STORE_TOKEN_SECRET: iuasbcuasdcbasdgcasdgcuysachjsacyasdgjcgasdj
       DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,fpl_case_service,ccd_data,ccd_ps,em_ccd_orchestrator
       DEFINITION_STORE_HOST: http://ccd-definition-store-api:4451
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
-      IDAM_USER_URL: http://idam-api:8080
+      IDAM_USER_URL: http://idam-api:5000
       IDAM_S2S_URL: http://service-auth-provider-api:8489
       REFORM_SERVICE_NAME: ccd-data-store-api
       REFORM_TEAM: ccd
@@ -287,38 +306,21 @@ services:
       ELASTIC_SEARCH_HOSTS: ccd-elasticsearch:9200
       ELASTIC_SEARCH_DATA_NODES_HOSTS: "http://ccd-elasticsearch:9200"
       CCD_DM_DOMAIN: http://dm-store:8080
+      JAVA_TOOL_OPTIONS: -Xms128m -Xmx512m -XX:MaxPermSize=512m
     ports:
       - 4452:4452
     depends_on:
-      - rpa-em-ccd-orchestrator-shared-database
-      - ccd-user-profile-api
-      - ccd-definition-store-api
-    links:
-      - rpa-em-ccd-orchestrator-shared-database
+      - shared-database
       - ccd-user-profile-api
       - ccd-definition-store-api
       - idam-api
       - service-auth-provider-api
 
-  rpa-em-ccd-orchestrator-shared-database:
-    build: ./database
-    healthcheck:
-      interval: 10s
-      timeout: 10s
-      retries: 10
-    environment:
-      DB_USERNAME:
-      DB_PASSWORD:
-    ports:
-      - 5000:5432
-    volumes:
-      - rpa-em-ccd-orchestrator-shared-database:/var/lib/postgresql/data
-
   ccd-case-management-web:
     image: hmctspublic.azurecr.io/ccd/case-management-web:latest
-    container_name: ccd-case-management-web
+    container_name: ccdorc-ccd-case-management-web
     environment:
-      IDAM_LOGIN_URL: https://localhost:3501/login
+      IDAM_LOGIN_URL: http://localhost:9002/login
       CCD_GATEWAY_BASE_URL: http://localhost:3453
       CCD_ACTIVITY_BASE_URL:
       DM_GATEWAY_BASE_URL: https://api-gateway.dev.dm.reform.hmcts.net
@@ -332,16 +334,16 @@ services:
 
   ccd-api-gateway:
     image: hmctspublic.azurecr.io/ccd/api-gateway-web:latest
-    container_name: ccd-api-gateway
+    container_name: ccdorc-ccd-api-gateway
     environment:
-      IDAM_BASE_URL: http://idam-api:8080
-      IDAM_USER_URL: http://idam-api:8080
+      IDAM_BASE_URL: http://idam-api:5000
+      IDAM_USER_URL: http://idam-api:5000
       IDAM_S2S_URL: http://service-auth-provider-api:8489
       IDAM_SERVICE_KEY: AAAAAAAAAAAAAAAA
-      IDAM_OAUTH2_LOGOUT_ENDPOINT: http://idam-api:8080/session/:token
+      IDAM_OAUTH2_LOGOUT_ENDPOINT: http://idam-api:5000/session/:token
       IDAM_OAUTH2_CLIENT_ID: ccd_gateway
       IDAM_OAUTH2_CLIENT_SECRET: AAAAAAAAAAAAAAAA
-      IDAM_OAUTH2_TOKEN_ENDPOINT: http://idam-api:8080/oauth2/token
+      IDAM_OAUTH2_TOKEN_ENDPOINT: http://idam-api:5000/oauth2/token
       PROXY_DOCUMENT_MANAGEMENT: http://dm-store:8080
       ADDRESS_LOOKUP_TOKEN:
       PROXY_AGGREGATED: http://ccd-data-store-api:4452
@@ -358,21 +360,35 @@ services:
       - ccd-data-store-api
       - dm-store
 
-  authentication-web:
-    image: hmctsprivate.azurecr.io/tidam/authentication-web:latest
+  fr-am:
+    image: hmctsprivate.azurecr.io/idam/idam-fr-am:latest
+    container_name: ccdorc-fr-am
     environment:
-      IDAM_API_URL: http://idam-api:8080
-      IDAM_CONTINUE_URL_VALIDATOR_ENFORCE_TLS: "false"
-      REFORM_SERVICE_NAME: idam-api
-      REFORM_TEAM: idam
-      REFORM_ENVIRONMENT: local
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx512m -XX:MaxPermSize=512m
+    hostname: localam
     ports:
-      - 3501:8000
-    links:
-      - idam-api
+      - 9080:8080
+      - 1389:1389
     depends_on:
-      - idam-api
+      - shared-db
 
+  fr-idm:
+    image: hmctsprivate.azurecr.io/idam/idam-fr-idm:latest
+    container_name: ccdorc-fr-idm
+    environment:
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx512m -XX:MaxPermSize=512m
+    hostname: localidm
+    ports:
+      - 18080:18080
+      - 9010:9010
+    depends_on:
+      - fr-am
+      - shared-db
+
+  shared-db:
+    image: hmctsprivate.azurecr.io/idam/shared-db:latest
+    container_name: ccdorc-shared-db
+    ports:
+      - 5432:5432
 volumes:
-  rpa-em-ccd-orchestrator-shared-database:
   ccd-docker-azure-blob-data:

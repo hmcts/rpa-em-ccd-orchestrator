@@ -27,7 +27,6 @@ public class StitchingServiceTest {
     @Value("${em-rpa-stitching-api.resource}")
     private String stitchingResource;
 
-
     @Test
     public void stitchSuccessful() throws StitchingServiceException, InterruptedException {
         List<String> responses = new ArrayList<>();

@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.em.orchestrator.automatedbundling;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.em.orchestrator.automatedbundling.configuration.*;
 import uk.gov.hmcts.reform.em.orchestrator.service.dto.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,18 +31,22 @@ public class BundleFactory {
         bundle.setPageNumberFormat(configuration.pageNumberFormat);
         bundle.setPaginationStyle(configuration.paginationStyle);
         bundle.setFileName(configuration.filename);
+        bundle.setFileNameIdentifier(configuration.filenameIdentifier);
         bundle.setEligibleForCloningAsBoolean(false);
         bundle.setEligibleForStitchingAsBoolean(false);
+        bundle.setEnableEmailNotificationAsBoolean(configuration.enableEmailNotification);
+        bundle.setDocumentImage(configuration.documentImage);
 
-        addFolders(configuration.folders, bundle.getFolders(), configuration.sortOrder, caseJson);
-        addDocuments(configuration.documents, bundle.getDocuments(), configuration.sortOrder, caseJson);
+        addFolders(configuration.folders, bundle.getFolders(), configuration.sortOrder, configuration.documentNameValue, caseJson);
+        addDocuments(configuration.documents, bundle.getDocuments(), configuration.sortOrder, configuration.documentNameValue, caseJson);
 
         return bundle;
     }
 
     private void addFolders(List<BundleConfigurationFolder> sourceFolders,
                             List<CcdValue<CcdBundleFolderDTO>> destinationFolders,
-                            BundleConfigurationSortOrder sortOrder,
+                            BundleConfigurationSort sortOrder,
+                            String documentNameValue,
                             JsonNode caseData) throws DocumentSelectorException {
         int sortIndex = 0;
 
@@ -50,29 +56,30 @@ public class BundleFactory {
             ccdFolder.setSortIndex(sortIndex++);
             destinationFolders.add(new CcdValue<>(ccdFolder));
 
-            addDocuments(folder.documents, ccdFolder.getDocuments(), sortOrder, caseData);
+            addDocuments(folder.documents, ccdFolder.getDocuments(), sortOrder, documentNameValue, caseData);
 
             if (folder.folders != null && !folder.folders.isEmpty()) {
-                addFolders(folder.folders, ccdFolder.getFolders(), sortOrder, caseData);
+                addFolders(folder.folders, ccdFolder.getFolders(), sortOrder, documentNameValue, caseData);
             }
         }
     }
 
     private void addDocuments(List<BundleConfigurationDocumentSelector> sourceDocuments,
                               List<CcdValue<CcdBundleDocumentDTO>> destinationDocuments,
-                              BundleConfigurationSortOrder sortOrder,
+                              BundleConfigurationSort sortOrder,
+                              String documentNameValue,
                               JsonNode caseData) throws DocumentSelectorException {
 
         for (BundleConfigurationDocumentSelector selector : sourceDocuments) {
             List<CcdValue<CcdBundleDocumentDTO>> documents = selector instanceof BundleConfigurationDocument
-                ? addDocument((BundleConfigurationDocument) selector, caseData)
-                : addDocumentSet((BundleConfigurationDocumentSet) selector, caseData);
+                ? addDocument((BundleConfigurationDocument) selector, sortOrder, documentNameValue, caseData)
+                : addDocumentSet((BundleConfigurationDocumentSet) selector, sortOrder, documentNameValue, caseData);
 
             destinationDocuments.addAll(documents);
         }
 
         if (sortOrder != null) {
-            destinationDocuments.sort(sortOrder);
+            destinationDocuments.sort(sortOrder.order);
 
             for (int i = 0; i < destinationDocuments.size(); i++) {
                 destinationDocuments.get(i).getValue().setSortIndex(i);
@@ -81,44 +88,52 @@ public class BundleFactory {
     }
 
     private List<CcdValue<CcdBundleDocumentDTO>> addDocument(BundleConfigurationDocument documentSelector,
+                                                             BundleConfigurationSort sortOrder,
+                                                             String documentNameValue,
                                                              JsonNode caseData) throws DocumentSelectorException {
         ArrayList<CcdValue<CcdBundleDocumentDTO>> list = new ArrayList<>();
         JsonNode node = caseData.at(documentSelector.property);
 
         if (node.isMissingNode()) {
-            throw new DocumentSelectorException("Could not find element: " + documentSelector.property);
+            return new ArrayList<>();
         }
 
         if (node.isArray()) {
             throw new DocumentSelectorException("Element is an array: " + documentSelector.property);
         }
 
-        list.add(getDocumentFromNode(node));
+        list.add(getDocumentFromNode(node, sortOrder, documentNameValue));
 
         return list;
     }
 
-    private CcdValue<CcdBundleDocumentDTO> getDocumentFromNode(JsonNode node) throws DocumentSelectorException {
+    private CcdValue<CcdBundleDocumentDTO> getDocumentFromNode(JsonNode node,
+                                                               BundleConfigurationSort sortOrder,
+                                                               String documentNameValue) throws DocumentSelectorException {
         CcdDocument sourceDocument = new CcdDocument();
 
         sourceDocument.setUrl(getField(node, "/documentLink/document_url").asText());
         sourceDocument.setBinaryUrl(getField(node, "/documentLink/document_binary_url").asText());
         sourceDocument.setFileName(getField(node, "/documentLink/document_filename").asText());
 
-        JsonNode dateNode = node.at("/createdDatetime");
-
-        if (!dateNode.isNull() && !dateNode.isMissingNode()) {
-            sourceDocument.setCreatedDatetime(LocalDateTime.parse(dateNode.asText()));
-        }
-        else {
-            sourceDocument.setCreatedDatetime(LocalDateTime.MIN);
+        if (sortOrder != null) {
+            JsonNode dateNode = node.at(sortOrder.field);
+            if (!dateNode.isNull() && !dateNode.isMissingNode()) {
+                sourceDocument.setCreatedDatetime(getDate(dateNode.asText()));
+            } else {
+                sourceDocument.setCreatedDatetime(LocalDateTime.MIN);
+            }
         }
 
         CcdBundleDocumentDTO document = new CcdBundleDocumentDTO();
-        document.setName(getField(node, "/documentName").asText());
+        document.setName(getField(node, StringUtils.defaultIfEmpty(documentNameValue,"/documentName")).asText());
         document.setSourceDocument(sourceDocument);
 
         return new CcdValue<>(document);
+    }
+
+    private LocalDateTime getDate(String date) {
+        return date.length() > 10 ? LocalDateTime.parse(date) : LocalDate.parse(date).atStartOfDay();
     }
 
     private JsonNode getField(JsonNode outerNode, String path) throws DocumentSelectorException {
@@ -130,12 +145,14 @@ public class BundleFactory {
     }
 
     private List<CcdValue<CcdBundleDocumentDTO>> addDocumentSet(BundleConfigurationDocumentSet documentSelector,
+                                                                BundleConfigurationSort sortOrder,
+                                                                String documentNameValue,
                                                                 JsonNode caseData) throws DocumentSelectorException {
 
         JsonNode list = caseData.at(documentSelector.property);
 
         if (list.isMissingNode()) {
-            throw new DocumentSelectorException("Could not find element: " + documentSelector.property);
+            return new ArrayList<>();
         }
 
         if (!list.isArray()) {
@@ -146,7 +163,7 @@ public class BundleFactory {
             .stream(list.spliterator(), true)
             .map(n -> n.at("/value"))
             .filter(n -> anyFilterMatches(documentSelector.filters, n))
-            .map(unchecked(this::getDocumentFromNode))
+            .map(unchecked(node -> this.getDocumentFromNode(node, sortOrder, documentNameValue)))
             .collect(Collectors.toList());
     }
 
@@ -154,7 +171,7 @@ public class BundleFactory {
                                      JsonNode node) {
 
         for (BundleConfigurationDocumentSet.BundleConfigurationFilter filter : filters) {
-            if (!node.at(filter.property).asText().equals(filter.value)) {
+            if (!node.at(filter.property).asText().matches(filter.value)) {
                 return false;
             }
         }

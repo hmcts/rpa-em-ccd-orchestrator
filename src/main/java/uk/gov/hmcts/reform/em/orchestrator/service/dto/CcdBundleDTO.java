@@ -2,8 +2,10 @@ package uk.gov.hmcts.reform.em.orchestrator.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import uk.gov.hmcts.reform.em.orchestrator.domain.enumeration.PageNumberFormat;
+import uk.gov.hmcts.reform.em.orchestrator.stitching.dto.DocumentImage;
 
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -26,6 +28,7 @@ public class CcdBundleDTO {
     @Size(min = 2, max = 30)
     @Pattern(regexp = "^[-._A-Za-z0-9]*$")
     private String fileName;
+    private String fileNameIdentifier;
     private String coverpageTemplate;
     @JsonIgnore
     private JsonNode coverpageTemplateData;
@@ -36,6 +39,11 @@ public class CcdBundleDTO {
     private CcdBundlePaginationStyle paginationStyle = CcdBundlePaginationStyle.off;
     private PageNumberFormat pageNumberFormat = PageNumberFormat.numberOfPages;
     private String stitchingFailureMessage;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private CcdBoolean enableEmailNotification;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private DocumentImage documentImage;
 
     public String getId() {
         return id;
@@ -133,6 +141,14 @@ public class CcdBundleDTO {
         this.fileName = fileName;
     }
 
+    public String getFileNameIdentifier() {
+        return fileNameIdentifier;
+    }
+
+    public void setFileNameIdentifier(String fileNameIdentifier) {
+        this.fileNameIdentifier = fileNameIdentifier;
+    }
+
     public String getCoverpageTemplate() {
         return coverpageTemplate;
     }
@@ -216,5 +232,35 @@ public class CcdBundleDTO {
     public void setStitchingFailureMessage(String stitchingFailureMessage) {
         this.stitchingFailureMessage = stitchingFailureMessage;
 
+    }
+
+    public CcdBoolean getEnableEmailNotification() {
+        return enableEmailNotification;
+    }
+
+    public void setEnableEmailNotification(CcdBoolean enableEmailNotification) {
+        this.enableEmailNotification = enableEmailNotification;
+    }
+
+    @JsonIgnore
+    public void setEnableEmailNotificationAsBoolean(Boolean enableEmailNotification) {
+        if (enableEmailNotification == null) {
+            this.enableEmailNotification = null;
+        } else {
+            this.enableEmailNotification = enableEmailNotification ? CcdBoolean.Yes : CcdBoolean.No;
+        }
+    }
+
+    @JsonIgnore
+    public Boolean getEnableEmailNotificationAsBoolean() {
+        return enableEmailNotification != null ? enableEmailNotification == CcdBoolean.Yes : null;
+    }
+
+    public DocumentImage getDocumentImage() {
+        return documentImage;
+    }
+
+    public void setDocumentImage(DocumentImage documentImage) {
+        this.documentImage = documentImage;
     }
 }

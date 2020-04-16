@@ -6,7 +6,7 @@
       "document_filename":"document1.pdf",
       "document_binary_url":"http://dm-store:8080/documents/05647df3-094c-45a3-b667-2a6f1bf3d088/binary"
     },
-    "createdDatetime":"2019-02-02T11:05:20.000"
+    "customTimeField":"2019-02-02T11:05:20.000"
   },
   "caseDocuments": [{
     "value": {
@@ -17,7 +17,7 @@
         "document_filename":"document2.pdf",
         "document_binary_url":"http://dm-store:8080/documents/05647df3-094c-45a3-b667-2a6f1bf3d088/binary"
       },
-      "createdDatetime": null
+      "customTimeField": null
     }
   }, {
     "value": {
@@ -28,7 +28,7 @@
         "document_filename":"document3.pdf",
         "document_binary_url":"http://dm-store:8080/documents/05647df3-094c-45a3-b667-2a6f1bf3d088/binary"
       },
-      "createdDatetime":"2019-02-07T11:05:20.000"
+      "customTimeField":"2019-02-07T11:05:20.000"
     }
   }, {
     "value": {
@@ -40,7 +40,7 @@
         "document_filename":"document4.pdf",
         "document_binary_url":"http://dm-store:8080/documents/05647df3-094c-45a3-b667-2a6f1bf3d088/binary"
       },
-      "createdDatetime":"2019-02-01T11:05:20.000"
+      "customTimeField":"2019-02-01T11:05:20.000"
     }
   }]
 }

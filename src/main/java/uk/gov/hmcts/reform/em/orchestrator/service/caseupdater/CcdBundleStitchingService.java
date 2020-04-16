@@ -55,7 +55,7 @@ public class CcdBundleStitchingService implements CcdCaseUpdater {
                     .collect(Collectors.toList());
 
             maybeBundles.get().removeAll();
-            maybeBundles.get().addAll(newBundles);
+            maybeBundles.get().addAll(CcdCaseUpdater.reorderBundles(newBundles, objectMapper, type));
         }
 
         return ccdCallbackDto.getCaseData();
@@ -63,6 +63,7 @@ public class CcdBundleStitchingService implements CcdCaseUpdater {
 
     private CcdValue<CcdBundleDTO> stitchBundle(CcdValue<CcdBundleDTO> bundle, CcdCallbackDto ccdCallbackDto) {
         bundle.getValue().setCoverpageTemplateData(ccdCallbackDto.getCaseDetails());
+        ccdCallbackDto.setEnableEmailNotification(bundle.getValue().getEnableEmailNotificationAsBoolean());
         Set<ConstraintViolation<CcdBundleDTO>> violations = validator.validate(bundle.getValue());
 
         if (!violations.isEmpty()) {
@@ -72,7 +73,6 @@ public class CcdBundleStitchingService implements CcdCaseUpdater {
         try {
             CcdDocument stitchedDocumentURI = stitchingService.stitch(bundle.getValue(), ccdCallbackDto.getJwt());
             bundle.getValue().setStitchedDocument(stitchedDocumentURI);
-            bundle.getValue().setEligibleForStitchingAsBoolean(false);
 
             return bundle;
         } catch (InterruptedException e) {

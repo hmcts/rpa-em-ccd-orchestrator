@@ -42,7 +42,7 @@ public class CcdCallbackBundleUpdaterTest {
 
         StitchingCompleteCallbackDto stitchingCompleteCallbackDto =
                 new StitchingCompleteCallbackDto("1", "1", "1",
-                        UUID.fromString("922639a4-9b06-4574-b329-ce7ecf845d6b"),
+                        "922639a4-9b06-4574-b329-ce7ecf845d6b",
                         documentTaskDTO);
 
         ccdCallbackBundleUpdater.updateBundle(ccdCallbackDto, stitchingCompleteCallbackDto);
@@ -74,7 +74,7 @@ public class CcdCallbackBundleUpdaterTest {
 
         StitchingCompleteCallbackDto stitchingCompleteCallbackDto =
                 new StitchingCompleteCallbackDto("1", "1", "1",
-                        UUID.fromString("922639a4-9b06-4574-b329-ce7ecf845d6b"),
+                        "922639a4-9b06-4574-b329-ce7ecf845d6b",
                         documentTaskDTO);
 
         ccdCallbackBundleUpdater.updateBundle(ccdCallbackDto, stitchingCompleteCallbackDto);
@@ -104,7 +104,7 @@ public class CcdCallbackBundleUpdaterTest {
         StitchingCompleteCallbackDto stitchingCompleteCallbackDto = new StitchingCompleteCallbackDto(
                 "jwt",
                 "1", "x",
-                UUID.fromString("922639a4-9b06-4574-b329-ce7ecf845d6b"),
+                "922639a4-9b06-4574-b329-ce7ecf845d6b",
                 null);
         assertThrows(CallbackException.class, () -> ccdCallbackBundleUpdater.updateBundle(ccdCallbackDto, stitchingCompleteCallbackDto));
     }
@@ -127,7 +127,7 @@ public class CcdCallbackBundleUpdaterTest {
 
         StitchingCompleteCallbackDto stitchingCompleteCallbackDto =
                 new StitchingCompleteCallbackDto("1", "1", "1",
-                        UUID.randomUUID(),
+                        UUID.randomUUID().toString(),
                         documentTaskDTO);
 
         assertThrows(CallbackException.class, () -> ccdCallbackBundleUpdater.updateBundle(ccdCallbackDto, stitchingCompleteCallbackDto));

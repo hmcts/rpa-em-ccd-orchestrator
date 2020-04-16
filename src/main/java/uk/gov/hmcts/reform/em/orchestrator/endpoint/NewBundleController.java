@@ -27,5 +27,4 @@ public class NewBundleController {
     public ResponseEntity<CcdCallbackResponseDto> prepareNewBundle(HttpServletRequest request) {
         return ResponseEntity.ok(defaultUpdateCaller.executeUpdate(automatedCaseUpdater, request));
     }
-
 }

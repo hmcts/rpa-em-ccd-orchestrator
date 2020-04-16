@@ -15,7 +15,7 @@ properties([
 
 def type = "java"
 def product = "em"
-def component = "ccd-orchestrator"
+def component = "ccdorc"
 
 def secrets = [
         's2s-${env}': [
@@ -36,28 +36,32 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
     ]
 }
 
-env.IDAM_API_BASE_URI = 'https://idam-api.demo.platform.hmcts.net'
-env.S2S_BASE_URI = 'http://rpe-service-auth-provider-demo.service.core-compute-demo.internal'
-env.IDAM_WEBSHOW_WHITELIST = 'https://em-show-demo.service.core-compute-demo.internal/oauth2/callback'
-env.EM_STITCHING_API_URL = 'http://em-stitching-demo.service.core-compute-demo.internal'
-env.DM_STORE_APP_URL = 'http://dm-store-demo.service.core-compute-demo.internal'
-env.CCD_DEF_API = 'http://ccd-definition-store-api-demo.service.core-compute-demo.internal'
-env.CCD_DATA_API = 'http://ccd-data-store-api-demo.service.core-compute-demo.internal'
+env.IDAM_API_BASE_URI = 'https://idam-api.aat.platform.hmcts.net'
+env.OPEN_ID_API_BASE_URI = 'https://idam-web-public.aat.platform.hmcts.net/o'
+env.S2S_BASE_URI = 'http://rpe-service-auth-provider-aat.service.core-compute-aat.internal'
+env.IDAM_WEBSHOW_WHITELIST = 'https://em-show-aat.service.core-compute-aat.internal/oauth2/callback'
+env.EM_STITCHING_API_URL = 'http://em-stitching-aat.service.core-compute-aat.internal'
+env.DM_STORE_APP_URL = 'http://dm-store-aat.service.core-compute-aat.internal'
+env.CCD_DEF_API = 'http://ccd-definition-store-api-aat.service.core-compute-aat.internal'
+env.CCD_DATA_API = 'http://ccd-data-store-api-aat.service.core-compute-aat.internal'
 
 def vaultOverrides = [
         'preview' : 'aat',
+        'perftest' : 'aat',
         'spreview': 'saat'
 ]
 
 withPipeline(type , product, component) {
     overrideVaultEnvironments(vaultOverrides)
-    enableDockerBuild()
     loadVaultSecrets(secrets)
     installCharts()
-//    enableAksStagingDeployment()
-//    disableLegacyDeployment()
+    enableAksStagingDeployment()
+    disableLegacyDeployment()
 
-    after('smoketest:demo') {
-        sh "./gradlew clean functional"
+    before('aat:promotion') {
+        sh '''
+curl https://raw.githubusercontent.com/hmcts/reform-api-docs/master/bin/publish-swagger-docs.sh > publish-swagger-docs.sh
+sh ./publish-swagger-docs.sh
+'''
     }
 }

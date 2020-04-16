@@ -19,7 +19,7 @@
             "document_filename":"prosecution1.pdf",
             "document_binary_url":"documentUrl/binary"
           },
-          "createdDatetime":"2019-02-07T11:05:20.000",
+          "customDatetimeField":"2019-02-07T11:05:20.000",
           "createdBy":"Jeroen"
         }}, {
         "value": {
@@ -30,7 +30,7 @@
             "document_filename":"prosecution2.pdf",
             "document_binary_url":"documentUrl/binary"
           },
-          "createdDatetime":"2019-02-07T12:05:20.000",
+          "customDatetimeField":"2019-02-07T12:05:20.000",
           "createdBy":"Jeroen"
         }}, {
         "value": {
@@ -41,7 +41,7 @@
             "document_filename":"defendant1.pdf",
             "document_binary_url":"documentUrl/binary"
           },
-          "createdDatetime":"2019-02-07T14:05:20.000",
+          "customDatetimeField":"2019-02-07T14:05:20.000",
           "createdBy":"Jeroen"
         }},
         {
@@ -53,7 +53,7 @@
               "document_filename":"evidence.pdf",
               "document_binary_url":"documentUrl/binary"
             },
-            "createdDatetime":"2019-02-07T13:05:20.000",
+            "customDatetimeField":"2019-02-07T13:05:20.000",
             "createdBy":"Linus"
           }
         }],
@@ -65,7 +65,7 @@
           "document_filename":"singleDocument1.pdf",
           "document_binary_url":"documentUrl/binary"
         },
-        "createdDatetime":"2019-02-07T10:05:20.000",
+        "customDatetimeField":"2019-02-07T10:05:20.000",
         "createdBy":"Jeroen"
 
       },

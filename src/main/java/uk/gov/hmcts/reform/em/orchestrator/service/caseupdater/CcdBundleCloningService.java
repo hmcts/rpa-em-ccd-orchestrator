@@ -44,7 +44,7 @@ public class CcdBundleCloningService implements CcdCaseUpdater {
 
         if (maybeBundles.isPresent() && processedMaybeBundles.isPresent()) {
             maybeBundles.get().removeAll();
-            maybeBundles.get().addAll(processedMaybeBundles.get());
+            maybeBundles.get().addAll(reorderBundles(processedMaybeBundles.get()));
         }
 
         return ccdCallbackDto.getCaseData();
@@ -55,8 +55,6 @@ public class CcdBundleCloningService implements CcdCaseUpdater {
 
         CcdBundleDTO originalBundle = bundleJsonToBundleDto(originalJson);
         if (originalBundle.getEligibleForCloningAsBoolean()) {
-            originalBundle.setEligibleForCloningAsBoolean(false);
-
             JsonNode originalProcessedJson = bundleDtoToBundleJson(originalBundle);
             JsonNode clonedJson = cloneBundle(originalProcessedJson);
 
@@ -86,5 +84,24 @@ public class CcdBundleCloningService implements CcdCaseUpdater {
         CcdValue<CcdBundleDTO> ccdValue = new CcdValue<>();
         ccdValue.setValue(ccdBundle);
         return objectMapper.convertValue(ccdValue, JsonNode.class);
+    }
+
+    private ArrayNode reorderBundles(ArrayNode bundles) {
+        ArrayNode reorderedBundles = objectMapper.createArrayNode();
+        for (JsonNode bundle : bundles) {
+            CcdValue<CcdBundleDTO> ccdBundleDTO = null;
+            try {
+                ccdBundleDTO = objectMapper.readValue(objectMapper.treeAsTokens(bundle), type);
+                if (ccdBundleDTO.getValue().getEligibleForCloningAsBoolean()) {
+                    ccdBundleDTO.getValue().setEligibleForCloningAsBoolean(false);
+                    reorderedBundles.insert(0, objectMapper.convertValue(ccdBundleDTO, JsonNode.class));
+                } else {
+                    reorderedBundles.add(objectMapper.convertValue(ccdBundleDTO, JsonNode.class));
+                }
+            } catch (IOException e) {
+                return bundles;
+            }
+        }
+        return reorderedBundles;
     }
 }

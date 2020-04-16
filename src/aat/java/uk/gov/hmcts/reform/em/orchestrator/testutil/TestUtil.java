@@ -5,11 +5,14 @@ import io.restassured.specification.RequestSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.em.orchestrator.domain.enumeration.ImageRendering;
+import uk.gov.hmcts.reform.em.orchestrator.domain.enumeration.ImageRenderingLocation;
 import uk.gov.hmcts.reform.em.orchestrator.service.dto.CcdBoolean;
 import uk.gov.hmcts.reform.em.orchestrator.service.dto.CcdBundleDTO;
 import uk.gov.hmcts.reform.em.orchestrator.service.dto.CcdBundleDocumentDTO;
 import uk.gov.hmcts.reform.em.orchestrator.service.dto.CcdDocument;
 import uk.gov.hmcts.reform.em.orchestrator.service.dto.CcdValue;
+import uk.gov.hmcts.reform.em.orchestrator.stitching.dto.DocumentImage;
 import uk.gov.hmcts.reform.em.test.dm.DmHelper;
 import uk.gov.hmcts.reform.em.test.idam.IdamHelper;
 import uk.gov.hmcts.reform.em.test.s2s.S2sHelper;
@@ -73,13 +76,13 @@ public class TestUtil {
 
     public RequestSpecification s2sAuthRequest() {
         return RestAssured
-            .given()
-            .header("ServiceAuthorization", s2sAuth);
+                .given()
+                .header("ServiceAuthorization", s2sAuth);
     }
 
     public RequestSpecification authRequest() {
         return s2sAuthRequest()
-            .header("Authorization", idamAuth);
+                .header("Authorization", idamAuth);
     }
 
     public CcdBundleDTO getTestBundle() {
@@ -153,6 +156,75 @@ public class TestUtil {
 
     public String getDmDocumentApiUrl() {
         return dmDocumentApiUrl;
+    }
+
+    public CcdBundleDTO getTestBundleWithImageRendered() {
+        DocumentImage documentImage = new DocumentImage();
+        documentImage.setImageRendering(ImageRendering.translucent);
+        documentImage.setImageRenderingLocation(ImageRenderingLocation.firstPage);
+        documentImage.setCoordinateX(50);
+        documentImage.setCoordinateY(50);
+        documentImage.setDocmosisAssetId("schmcts.png");
+        CcdBundleDTO bundle = new CcdBundleDTO();
+        bundle.setId(UUID.randomUUID().toString());
+        bundle.setTitle("Bundle title");
+        bundle.setDescription("Test bundle");
+        bundle.setEligibleForStitchingAsBoolean(true);
+        bundle.setEligibleForCloningAsBoolean(false);
+        bundle.setDocumentImage(documentImage);
+
+        CcdDocument doc = new CcdDocument();
+        doc.setBinaryUrl("www.exampleurl.com/binary");
+        doc.setFileName("doc filename");
+        doc.setUrl("www.exampleurl.com");
+        bundle.setStitchedDocument(doc);
+
+        List<CcdValue<CcdBundleDocumentDTO>> docs = new ArrayList<>();
+        docs.add(getTestBundleDocument(uploadDocument()));
+        bundle.setDocuments(docs);
+
+        bundle.setFileName("fileName");
+        bundle.setHasTableOfContents(CcdBoolean.Yes);
+        bundle.setHasCoversheets(CcdBoolean.Yes);
+        bundle.setStitchStatus("");
+        bundle.setDocumentImage(documentImage);
+        return bundle;
+    }
+
+    public RequestSpecification emptyIdamAuthRequest() {
+        return s2sAuthRequest()
+                .header("Authorization", null);
+    }
+
+    public RequestSpecification emptyIdamAuthAndEmptyS2SAuth() {
+        return RestAssured
+                .given()
+                .header("ServiceAuthorization", null)
+                .header("Authorization", null);
+    }
+
+    public RequestSpecification validAuthRequestWithEmptyS2SAuth() {
+        return emptyS2sAuthRequest().header("Authorization", idamAuth);
+    }
+
+    public RequestSpecification validS2SAuthWithEmptyIdamAuth() {
+        return s2sAuthRequest().header("Authorization", null);
+    }
+
+    private RequestSpecification emptyS2sAuthRequest() {
+        return RestAssured.given().header("ServiceAuthorization", null);
+    }
+
+    public RequestSpecification invalidIdamAuthrequest() {
+        return s2sAuthRequest().header("Authorization", "invalidIDAMAuthRequest");
+    }
+
+    public RequestSpecification invalidS2SAuth() {
+        return invalidS2sAuthRequest().header("Authorization", idamAuth);
+    }
+
+    private RequestSpecification invalidS2sAuthRequest() {
+        return RestAssured.given().header("ServiceAuthorization", "invalidS2SAuthorization");
     }
 
 }

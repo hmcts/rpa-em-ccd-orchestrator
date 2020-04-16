@@ -1,5 +1,5 @@
 variable "product" {
-  type = "string"
+  type    = "string"
   default = "em"
 }
 
@@ -32,12 +32,12 @@ variable "subscription" {
   type = "string"
 }
 
-variable "ilbIp"{}
+variable "ilbIp" {}
 
 variable "tenant_id" {}
 
 variable "jenkins_AAD_objectId" {
-  type = "string"
+  type        = "string"
   description = "(Required) The Azure AD object ID of a user, service principal or security group in the Azure Active Directory tenant for the vault. The object ID must be unique for the list of access policies."
 }
 
@@ -48,6 +48,7 @@ variable "common_tags" {
 variable "managed_identity_object_id" {
   default = ""
 }
+
 ////////////////////////////////////////////////
 //Addtional Vars ///////////////////////////////
 ////////////////////////////////////////////////
@@ -58,11 +59,16 @@ variable "capacity" {
 variable "java_opts" {
   default = ""
 }
+
 ////////////////////////////////////////////////
 // Endpoints
 ////////////////////////////////////////////////
 variable "idam_api_base_uri" {
   default = "http://betaDevBccidamAppLB.reform.hmcts.net:80"
+}
+
+variable "open_id_api_base_uri" {
+  default = "idam-api"
 }
 
 variable "s2s_url" {
@@ -84,7 +90,6 @@ variable "em_ccd_orchestrator_url" {
 variable "ccd_data_store_api_url" {
   default = "ccd-data-store-api"
 }
-
 
 ////////////////////////////////////////////////
 // Logging
@@ -121,15 +126,16 @@ variable "endpoints_health_sensitive" {
 variable "endpoints_info_sensitive" {
   default = "true"
 }
+
 ////////////////////////////////////////////////
 // Toggle Features
 ////////////////////////////////////////////////
 variable "enable_idam_healthcheck" {
-    default = "false"
+  default = "false"
 }
 
 variable "enable_s2s_healthcheck" {
-    default = "false"
+  default = "false"
 }
 
 ////////////////////////////////////////////////
@@ -138,6 +144,8 @@ variable "enable_s2s_healthcheck" {
 variable "enable_stitching_complete_callback" {
   default = "true"
 }
+
 ////////////////////////////////////////////////
 // Addtional
 ////////////////////////////////////////////////
+

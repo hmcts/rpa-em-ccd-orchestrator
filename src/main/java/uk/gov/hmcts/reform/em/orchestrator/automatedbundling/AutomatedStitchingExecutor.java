@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.em.orchestrator.automatedbundling;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import uk.gov.hmcts.reform.em.orchestrator.stitching.dto.DocumentTaskDTO;
 import uk.gov.hmcts.reform.em.orchestrator.stitching.mapper.StitchingDTOMapper;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Service
 public class AutomatedStitchingExecutor {
@@ -33,6 +35,10 @@ public class AutomatedStitchingExecutor {
     }
 
     public void startStitching(String caseId, String triggerId, String jwt, CcdBundleDTO ccdBundleDTO) {
+
+        if (StringUtils.isEmpty(ccdBundleDTO.getId())) {
+            ccdBundleDTO.setId(UUID.randomUUID().toString());
+        }
 
         final DocumentTaskDTO documentTask = new DocumentTaskDTO();
         documentTask.setBundle(stitchingDTOMapper.toStitchingDTO(ccdBundleDTO));

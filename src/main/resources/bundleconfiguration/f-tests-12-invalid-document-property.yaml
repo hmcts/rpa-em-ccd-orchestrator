@@ -1,0 +1,23 @@
+title: Functional tests bundle 1
+filename: bundle.pdf
+hasTableOfContents: true
+hasCoversheets: true
+sort:
+  field: /customDatetimeField
+  order: ascending
+hasFolderCoversheets: true
+paginationStyle: topCenter
+pageNumberFormat: pageRange
+folders:
+  - name: DWP
+    documents:
+      - type: documentSet
+        property: /caseDocuments
+        filters:
+          - property: /documentType
+            value: Prosecution
+      - type: documentSet
+        property: /caseDocuments
+        filters:
+          - property: /invalidDocumentType
+            value: Evidence

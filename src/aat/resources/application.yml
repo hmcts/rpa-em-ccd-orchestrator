@@ -5,17 +5,29 @@ spring:
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  security:
+    oauth2:
+      client:
+        provider:
+          oidc:
+            issuer-uri: ${OPEN_ID_API_BASE_URI:http://localhost:5000/o}
+        registration:
+          oidc:
+            client-id: webshow
+            client-secret: ${S2S_KEY:AAAAAAAAAAAAAAAA}
 
 test:
   url: ${TEST_URL:http://localhost:8080}
 
 idam:
   api:
-    url: ${IDAM_API_BASE_URI:http://localhost:4501}
+    url: ${IDAM_API_BASE_URI:http://localhost:5000}
   client:
     id: ${OAUTH_CLIENT:webshow}
     secret: ${FUNCTIONAL_TEST_CLIENT_OAUTH_SECRET:AAAAAAAAAAAAAAAA}
     redirect_uri: ${IDAM_WEBSHOW_WHITELIST:http://localhost:8080/oauth2redirect}
+    grant_type: 'password'
+    scope: 'openid roles profile'
 
 s2s:
   api:
@@ -43,4 +55,12 @@ annotation:
   api:
     url: ${EM_ANNO_APP_URL:http://localhost:4623}
 
+azure:
+  app_insights_key: ${APPINSIGHTS_INSTRUMENTATIONKEY:true}
+  application-insights:
+    instrumentation-key: ${APPINSIGHTS_INSTRUMENTATIONKEY:d30268e8-8979-4579-8d58-010dbe03a1e6}
 
+app-insights:
+  dev-mode: off
+  request-component: on
+  telemetry-component: on

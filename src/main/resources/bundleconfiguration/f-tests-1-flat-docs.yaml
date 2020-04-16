@@ -1,11 +1,14 @@
 title: Functional tests bundle 1
 filename: bundle.pdf
-coverpageTemplate: FL-FRM-APP-ENG-00002.docx
 hasTableOfContents: true
 hasCoversheets: true
+sort:
+  field: /customDatetimeField
+  order: ascending
 hasFolderCoversheets: true
-paginationStyle: bottomLeft
+paginationStyle: topCenter
 pageNumberFormat: pageRange
+enableEmailNotification: false
 documents:
   - type: documentSet
     property: /caseDocuments

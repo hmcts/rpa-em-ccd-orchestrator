@@ -35,7 +35,7 @@ public class StitchingCompleteCallbackServiceTest {
             .when(ccdDataApiEventCreator.executeTrigger("a","1", "x"))
             .thenReturn(new CcdCallbackDto());
         stitchingCompleteCallbackService.handleCallback(new StitchingCompleteCallbackDto("x", "a",
-                "1", UUID.randomUUID(), new DocumentTaskDTO()));
+                "1", UUID.randomUUID().toString(), new DocumentTaskDTO()));
         assertTrue(true, "No exception should be thrown");
     }
 
@@ -46,7 +46,7 @@ public class StitchingCompleteCallbackServiceTest {
                 .thenThrow(new CallbackException(111, "err body", "err"));
         assertThrows(CallbackException.class, () ->
                 stitchingCompleteCallbackService.handleCallback(new StitchingCompleteCallbackDto("x",
-                        "a", "1", UUID.randomUUID(), new DocumentTaskDTO())));
+                        "a", "1", UUID.randomUUID().toString(), new DocumentTaskDTO())));
     }
 
     @Test
@@ -60,7 +60,7 @@ public class StitchingCompleteCallbackServiceTest {
 
         assertThrows(CallbackException.class, () ->
                 stitchingCompleteCallbackService.handleCallback(new StitchingCompleteCallbackDto("x",
-                        "a", "1", UUID.randomUUID(), new DocumentTaskDTO())));
+                        "a", "1", UUID.randomUUID().toString(), new DocumentTaskDTO())));
     }
 
     @Test
@@ -70,7 +70,7 @@ public class StitchingCompleteCallbackServiceTest {
                 .thenReturn(null);
 
         stitchingCompleteCallbackService.handleCallback(new StitchingCompleteCallbackDto("x",
-                "a", "1", UUID.randomUUID(), new DocumentTaskDTO()));
+                "a", "1", UUID.randomUUID().toString(), new DocumentTaskDTO()));
 
         Mockito.verify(ccdDataApiCaseUpdater, Mockito.never()).executeUpdate(Mockito.any(), Mockito.any());
 
