@@ -8,6 +8,8 @@ import uk.gov.hmcts.reform.em.orchestrator.stitching.dto.DocumentImage;
 import java.util.ArrayList;
 import java.util.List;
 
+import static uk.gov.hmcts.reform.em.orchestrator.util.StringUtilities.ensurePdfExtension;
+
 /**
  * Parsed configuration file for automated bundles.
  */
@@ -47,7 +49,7 @@ public class BundleConfiguration {
                                @JsonProperty("enableEmailNotification") Boolean enableEmailNotification) {
 
         this.title = title;
-        this.filename = filename == null ? "stitched.pdf" : filename;
+        this.filename = ensurePdfExtension(filename);
         this.filenameIdentifier = filenameIdentifier;
         this.coverpageTemplate = coverpageTemplate == null ? "" : coverpageTemplate;
         this.pageNumberFormat = pageNumberFormat;

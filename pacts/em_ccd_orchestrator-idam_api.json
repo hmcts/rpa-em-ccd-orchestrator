@@ -7,6 +7,107 @@
     },
     "interactions": [
         {
+            "description": "Provider receives a POST /o/token request from CCD Orchestrator API",
+            "request": {
+                "method": "POST",
+                "path": "/o/token",
+                "headers": {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                "body": {
+                    "grant_type": "password",
+                    "client_id": "ia",
+                    "client_secret": "some_client_secret",
+                    "redirect_uri": "/oauth2redirect",
+                    "scope": "openid roles profile",
+                    "username": "ccdorcusername",
+                    "password": "ccdorcpwd"
+                }
+            },
+            "response": {
+                "status": 200,
+                "headers": {
+                    "Content-Type": "application/json; charset=UTF-8"
+                },
+                "body": {
+                    "access_token": "some-long-value",
+                    "refresh_token": "another-long-value",
+                    "scope": "openid roles profile",
+                    "id_token": "some-value",
+                    "token_type": "Bearer",
+                    "expires_in": "12345"
+                },
+                "matchingRules": {
+                    "body": {
+                        "$.access_token": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.refresh_token": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.scope": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.id_token": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.token_type": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.expires_in": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        }
+                    },
+                    "header": {
+                        "Content-Type": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": "application/json;\\s?charset=(utf|UTF)-8"
+                                }
+                            ],
+                            "combine": "AND"
+                        }
+                    }
+                }
+            },
+            "providerStates": [
+                {
+                    "name": "Idam successfully returns access token"
+                }
+            ]
+        },
+        {
             "description": "Provider receives a GET /details request from an CCD Orchestrator API",
             "request": {
                 "method": "GET",
@@ -28,6 +129,48 @@
                     "email": "ia-caseofficer@fake.hmcts.net"
                 },
                 "matchingRules": {
+                    "body": {
+                        "$.id": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.email": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.forename": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.surname": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.roles": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        }
+                    },
                     "header": {
                         "Content-Type": {
                             "matchers": [

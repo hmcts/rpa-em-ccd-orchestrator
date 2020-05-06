@@ -1,5 +1,6 @@
 title: CMC bundle sample
 filename: bundle.pdf
+filenameIdentifier: /case_details/id
 coverpageTemplate: CC-EDM-GOR-ENG-12345.docx
 hasTableOfContents: true
 hasCoversheets: true
@@ -10,6 +11,12 @@ hasFolderCoversheets: true
 paginationStyle: topCenter
 pageNumberFormat: numberOfPages
 enableEmailNotification: false
+documentImage:
+  docmosisAssetId: hmcts.png
+  imageRendering: opaque
+  imageRenderingLocation: allPages
+  coordinateX: 50
+  coordinateY: 50
 folders:
   - name: Claimant Evidence
     folders:

@@ -508,8 +508,8 @@ public class BundleFactoryTest {
         assertEquals("schmcts.png", bundle.getDocumentImage().getDocmosisAssetId());
         assertEquals(ImageRenderingLocation.allPages, bundle.getDocumentImage().getImageRenderingLocation());
         assertEquals(ImageRendering.opaque, bundle.getDocumentImage().getImageRendering());
-        assertEquals(40, bundle.getDocumentImage().getCoordinateX());
-        assertEquals(50, bundle.getDocumentImage().getCoordinateY());
+        assertEquals(Integer.valueOf(40), bundle.getDocumentImage().getCoordinateX());
+        assertEquals(Integer.valueOf(50), bundle.getDocumentImage().getCoordinateY());
 
     }
 }

@@ -64,6 +64,3 @@ app-insights:
   dev-mode: off
   request-component: on
   telemetry-component: on
-
-oidc:
-  issuer: ${OIDC_ISSUER_BASE_URI:http://localhost:8080/openam/oauth2/hmcts}

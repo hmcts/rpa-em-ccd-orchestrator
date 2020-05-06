@@ -1,3 +1,9 @@
+buildscript {
+    dependencies {
+        classpath("net.serenity-bdd:serenity-gradle-plugin:2.0.83")
+        classpath("net.serenity-bdd:serenity-single-page-report:2.1.4")
+    }
+}
 
 plugins {
     id 'application'
@@ -10,7 +16,7 @@ plugins {
     id 'checkstyle'
     id 'pmd'
     id 'io.franzbecker.gradle-lombok' version '3.3.0'
-    id 'au.com.dius.pact' version '4.0.7'
+    id 'au.com.dius.pact' version '4.0.4'
 }
 
 apply plugin: 'java'
@@ -20,6 +26,8 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'org.owasp.dependencycheck'
 apply plugin: 'com.github.ben-manes.versions'
 apply plugin: 'idea'
+apply plugin: 'net.serenity-bdd.aggregator'
+
 
 if (!project.hasProperty('runList')) {
     project.ext.runList = 'main'
@@ -46,6 +54,11 @@ repositories {
     }
 }
 
+def versions = [
+        serenity           : '2.0.23',
+        serenityreporter   : '2.1.4',
+        pact_version       : '3.5.24'
+]
 sourceSets {
     aat {
         java {
@@ -83,7 +96,7 @@ dependencies {
     compile "com.fasterxml.jackson.datatype:jackson-datatype-json-org:2.10.3"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-hppc:2.10.3"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.3"
-    compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.10.2"
+    compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.10.3"
     compile "com.fasterxml.jackson.core:jackson-core:2.10.3"
     compile "com.fasterxml.jackson.core:jackson-annotations:2.10.3"
     compile "com.fasterxml.jackson.core:jackson-databind:2.10.3"
@@ -117,27 +130,30 @@ dependencies {
     testCompile("org.springframework.boot:spring-boot-starter-test")
     testCompile group: "junit", name: "junit", version: "4.13"
     testCompile "com.github.gmazzo:okhttp-mock:1.3.2"
-    testCompile "io.rest-assured:rest-assured:4.2.0"
     testCompile "com.github.gmazzo:okhttp-mock:1.3.1"
     testCompile group: 'org.mockito', name: 'mockito-core', version: '3.3.3'
     testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.3.1'
-    testCompile "io.rest-assured:rest-assured:4.2.0"
-    testCompile group: "io.rest-assured", name: "json-path", version: "4.2.0"
-    testCompile group: "io.rest-assured", name: "xml-path", version: "4.2.0"
 
-    testCompile "org.junit.jupiter:junit-jupiter-api:5.6.0"
-    testRuntime "org.junit.jupiter:junit-jupiter-engine:5.6.0"
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.0"
+    testCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
+    testCompile group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
+    testCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
+    testCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: versions.serenity
+    testCompile group: 'net.serenity-bdd', name: 'serenity-single-page-report', version: versions.serenityreporter
+
+
+    testCompile "org.junit.jupiter:junit-jupiter-api:5.3.2"
+    testRuntime "org.junit.jupiter:junit-jupiter-engine:5.3.2"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.3.2"
 
     aatCompile group: 'org.apache.poi', name: 'poi', version: '4.1.2'
     aatCompile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2'
 
     //pact contract testing
-    contractTestCompile group: 'au.com.dius', name: 'pact-jvm-consumer-junit5_2.12', version: '3.6.14'
-    contractTestCompile group: 'au.com.dius', name: 'pact-jvm-consumer-java8_2.12', version: "3.6.14"
+    contractTestCompile group: 'au.com.dius', name: 'pact-jvm-consumer-junit5_2.12', version: versions.pact_version
+    contractTestCompile group: 'au.com.dius', name: 'pact-jvm-consumer-java8_2.12', version: versions.pact_version
 
     contractTestCompile("org.junit.jupiter:junit-jupiter-api:5.3.2")
-    contractTestRuntime("org.junit.jupiter:junit-jupiter-engine:5.6.0")
+    contractTestRuntime("org.junit.jupiter:junit-jupiter-engine:5.3.2")
     contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.3.2')
 
     contractTestCompile sourceSets.main.runtimeClasspath
@@ -282,7 +298,7 @@ task contract(type: Test) {
     testClassesDirs = sourceSets.contractTest.output.classesDirs
     classpath = sourceSets.contractTest.runtimeClasspath
     include "uk/gov/hmcts/reform/em/orchestrator/**"
-    systemProperty 'pact.rootDir', "${rootDir}/pacts"
+    systemProperty 'pact.rootDir', "pacts"
     environment("APPINSIGHTS_INSTRUMENTATIONKEY", "test-key")
 }
 
@@ -294,9 +310,13 @@ def getCheckedOutGitCommitHash() {
     'git rev-parse --verify --short HEAD'.execute().text.trim()
 }
 
+serenity {
+    reports = ["single-page-html"]
+}
+
 pact {
     publish {
-        pactDirectory = 'target/pacts'
+        pactDirectory = 'pacts'
         pactBrokerUrl = System.getenv("PACT_BROKER_FULL_URL") ?: 'http://localhost:80'
         tags = [System.getenv("PACT_BRANCH_NAME") ?: 'Dev']
         version = project.pactVersion

@@ -71,10 +71,6 @@ variable "open_id_api_base_uri" {
   default = "idam-api"
 }
 
-variable "oidc_issuer_base_uri" {
-  default = "idam-api"
-}
-
 variable "s2s_url" {
   default = "rpe-service-auth-provider"
 }

@@ -12,7 +12,6 @@ services:
       - S2S_BASE_URI=http://service-auth-provider-api:8489
       - IDAM_API_BASE_URI=http://idam-api:8080
       - OPEN_ID_API_BASE_URI=http://idam-api:5000/o
-      - OIDC_ISSUER_BASE_URI=http://fr-am:8080/openam/oauth2/hmcts
       - DM_STORE_APP_URL=http://dm-store:8080
       - EM_STITCHING_API_URL=http://stitching-api:8080
       - CALLBACK_DOMAIN=rpa-em-ccd-orchestrator
@@ -152,7 +151,6 @@ services:
       - S2S_BASE_URI=http://service-auth-provider-api:8489
       - IDAM_API_BASE_URI=http://idam-api:5000
       - OPEN_ID_API_BASE_URI=http://idam-api:5000/o
-      - OIDC_ISSUER_BASE_URI=http://fr-am:8080/openam/oauth2/hmcts
       - ENABLE_LIQUIBASE=true
       - APPINSIGHTS_INSTRUMENTATIONKEY=test-key
       - DM_STORE_APP_URL=http://dm-store:8080
