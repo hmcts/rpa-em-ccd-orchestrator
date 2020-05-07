@@ -47,5 +47,7 @@
         <cve>CVE-2020-1935</cve>
         <cve>CVE-2020-1938</cve>
         <cve>CVE-2020-11612</cve>
+        <cve>CVE-2020-9488</cve>
+        <cve>CVE-2020-1745</cve>
     </suppress>
 </suppressions>

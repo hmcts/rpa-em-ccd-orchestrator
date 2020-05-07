@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.em.orchestrator.stitching.dto.TaskState;
 
 import java.util.stream.StreamSupport;
 
+import static uk.gov.hmcts.reform.em.orchestrator.util.StringUtilities.ensurePdfExtension;
+
 @Service
 public class CcdCallbackBundleUpdater {
 
@@ -61,8 +63,7 @@ public class CcdCallbackBundleUpdater {
 
                 ccdBundleDTO.setStitchedDocument(new CcdDocument(
                         stitchingCompleteCallbackDto.getDocumentTaskDTO().getBundle().getStitchedDocumentURI(),
-                        stitchingCompleteCallbackDto.getDocumentTaskDTO().getBundle().getFileName() != null
-                                ? stitchingCompleteCallbackDto.getDocumentTaskDTO().getBundle().getFileName() : "stitched.pdf",
+                        ensurePdfExtension(stitchingCompleteCallbackDto.getDocumentTaskDTO().getBundle().getFileName()),
                         stitchingCompleteCallbackDto.getDocumentTaskDTO().getBundle().getStitchedDocumentURI() + "/binary"));
 
             }

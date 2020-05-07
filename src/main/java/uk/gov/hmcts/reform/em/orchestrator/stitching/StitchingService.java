@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.em.orchestrator.stitching.mapper.StitchingDTOMapper;
 
 import java.io.IOException;
 
+import static uk.gov.hmcts.reform.em.orchestrator.util.StringUtilities.ensurePdfExtension;
+
 /**
  * Communicates with the Stitching API in order to turn a bundle into a stitched document.
  */
@@ -67,7 +69,7 @@ public class StitchingService {
 
                 return new CcdDocument(
                     json.read("$.bundle.stitchedDocumentURI"),
-                    fileName != null ? fileName : "stitched.pdf",
+                    ensurePdfExtension(fileName),
                     uriWithBinarySuffix(json.read("$.bundle.stitchedDocumentURI"))
                 );
             } else {

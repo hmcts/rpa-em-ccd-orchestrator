@@ -42,8 +42,8 @@ public class StitchingServiceTest {
         StitchingService service = getStitchingService(http);
         CcdDocument docId = service.stitch(new CcdBundleDTO(), "token");
 
-        Assert.assertEquals(docId.getUrl(), "AAAAAA");
-        Assert.assertEquals(docId.getFileName(), "stitched.pdf");
+        Assert.assertEquals("AAAAAA", docId.getUrl());
+        Assert.assertEquals("stitched.pdf", docId.getFileName());
     }
 
     @Test
@@ -54,14 +54,62 @@ public class StitchingServiceTest {
         responses.add("{ \"id\": 1, \"taskState\": \"NEW\", \"bundle\": { \"stitchedDocumentURI\": null } }");
         responses.add("{ \"id\": 1, \"taskState\": \"NEW\", \"bundle\": { \"stitchedDocumentURI\": null } }");
         responses.add("{ \"id\": 1, \"taskState\": \"NEW\", \"bundle\": { \"stitchedDocumentURI\": null } }");
-        responses.add("{ \"id\": 1, \"taskState\": \"DONE\", \"bundle\": { \"stitchedDocumentURI\": \"AAAAAA\", \"fileName\": \"a.pdf\" } }");
+        responses.add("{ \"id\": 1, \"taskState\": \"DONE\", \"bundle\": { \"stitchedDocumentURI\": \"AAAAAA\", \"fileName\": \"Dummy.Bundle.01.docx\" } }");
 
         OkHttpClient http = getMockHttp(responses);
         StitchingService service = getStitchingService(http);
         CcdDocument docId = service.stitch(new CcdBundleDTO(), "token");
 
-        Assert.assertEquals(docId.getUrl(), "AAAAAA");
-        Assert.assertEquals(docId.getFileName(), "a.pdf");
+        Assert.assertEquals("AAAAAA", docId.getUrl());
+        Assert.assertEquals("Dummy.Bundle.01.docx", docId.getFileName());
+    }
+
+    @Test
+    public void stitchSuccessfulWithFileNameWithoutSuffix() throws StitchingServiceException, InterruptedException {
+        List<String> responses = new ArrayList<>();
+        responses.add("{ \"id\": 1, \"taskState\": \"NEW\", \"bundle\": { \"stitchedDocumentURI\": null } }");
+        responses.add("{ \"id\": 1, \"taskState\": \"NEW\", \"bundle\": { \"stitchedDocumentURI\": null } }");
+        responses.add("{ \"id\": 1, \"taskState\": \"NEW\", \"bundle\": { \"stitchedDocumentURI\": null } }");
+        responses.add("{ \"id\": 1, \"taskState\": \"NEW\", \"bundle\": { \"stitchedDocumentURI\": null } }");
+        responses.add("{ \"id\": 1, \"taskState\": \"NEW\", \"bundle\": { \"stitchedDocumentURI\": null } }");
+        responses.add("{ \"id\": 1, \"taskState\": \"DONE\", \"bundle\": { \"stitchedDocumentURI\": \"AAAAAA\", \"fileName\": \"Dummy-Bundle-01\" } }");
+
+        OkHttpClient http = getMockHttp(responses);
+        StitchingService service = getStitchingService(http);
+        CcdDocument docId = service.stitch(new CcdBundleDTO(), "token");
+
+        Assert.assertEquals("AAAAAA", docId.getUrl());
+        Assert.assertEquals("Dummy-Bundle-01.pdf", docId.getFileName());
+    }
+
+    @Test
+    public void stitchSuccessfulWithEmptyFileName() throws StitchingServiceException, InterruptedException {
+        List<String> responses = new ArrayList<>();
+        responses.add("{ \"id\": 1, \"taskState\": \"NEW\", \"bundle\": { \"stitchedDocumentURI\": null } }");
+        responses.add("{ \"id\": 1, \"taskState\": \"NEW\", \"bundle\": { \"stitchedDocumentURI\": null } }");
+        responses.add("{ \"id\": 1, \"taskState\": \"DONE\", \"bundle\": { \"stitchedDocumentURI\": \"AAAAAA\", \"fileName\": \"\" } }");
+
+        OkHttpClient http = getMockHttp(responses);
+        StitchingService service = getStitchingService(http);
+        CcdDocument docId = service.stitch(new CcdBundleDTO(), "token");
+
+        Assert.assertEquals("AAAAAA", docId.getUrl());
+        Assert.assertEquals("stitched.pdf", docId.getFileName());
+    }
+
+    @Test
+    public void stitchSuccessfulWithNullFileName() throws StitchingServiceException, InterruptedException {
+        List<String> responses = new ArrayList<>();
+        responses.add("{ \"id\": 1, \"taskState\": \"NEW\", \"bundle\": { \"stitchedDocumentURI\": null } }");
+        responses.add("{ \"id\": 1, \"taskState\": \"NEW\", \"bundle\": { \"stitchedDocumentURI\": null } }");
+        responses.add("{ \"id\": 1, \"taskState\": \"DONE\", \"bundle\": { \"stitchedDocumentURI\": \"AAAAAA\"} }");
+
+        OkHttpClient http = getMockHttp(responses);
+        StitchingService service = getStitchingService(http);
+        CcdDocument docId = service.stitch(new CcdBundleDTO(), "token");
+
+        Assert.assertEquals("AAAAAA", docId.getUrl());
+        Assert.assertEquals("stitched.pdf", docId.getFileName());
     }
 
     @Test(expected = StitchingServiceException.class)
