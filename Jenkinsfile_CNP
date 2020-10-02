@@ -1,4 +1,5 @@
 #!groovy
+import uk.gov.hmcts.contino.AppPipelineDsl
 
 properties([
     [
@@ -44,6 +45,7 @@ env.EM_STITCHING_API_URL = 'http://em-stitching-aat.service.core-compute-aat.int
 env.DM_STORE_APP_URL = 'http://dm-store-aat.service.core-compute-aat.internal'
 env.CCD_DEF_API = 'http://ccd-definition-store-api-aat.service.core-compute-aat.internal'
 env.CCD_DATA_API = 'http://ccd-data-store-api-aat.service.core-compute-aat.internal'
+env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
 
 def vaultOverrides = [
         'preview' : 'aat',
@@ -70,5 +72,10 @@ sh ./publish-swagger-docs.sh
 
     after('functionalTest:aat') {
         steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
+    }
+
+    onMaster()
+    {
+        enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
     }
 }

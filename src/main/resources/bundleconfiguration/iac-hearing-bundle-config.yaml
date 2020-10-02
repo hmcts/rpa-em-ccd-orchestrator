@@ -1,0 +1,38 @@
+title: IAC Hearing Bundle
+filename: hearing-bundle.pdf
+filenameIdentifier: /case_details/case_data/bundleFileNamePrefix
+coverpageTemplate: TB-IAC-HRN-ENG-00514.docx
+hasTableOfContents: true
+hasCoversheets: true
+documentNameValue: /document/document_filename
+documentLinkValue: /document
+sort:
+  field: /dateUploaded
+  order: ascending
+hasFolderCoversheets: true
+pageNumberFormat: numberOfPages
+folders:
+  - name: Hearing documents
+    documents:
+      - type: documentSet
+        property: /hearingDocuments
+  - name: Legal representative documents
+    documents:
+      - type: documentSet
+        property: /legalRepresentativeDocuments
+        filters:
+          - property: /tag
+            value: caseArgument
+      - type: documentSet
+        property: /legalRepresentativeDocuments
+        filters:
+          - property: /tag
+            value: appealSubmission
+  - name: Additional evidence from appellant
+    documents:
+      - type: documentSet
+        property: /additionalEvidenceDocuments
+  - name: Respondent documents
+    documents:
+      - type: documentSet
+        property: /respondentDocuments

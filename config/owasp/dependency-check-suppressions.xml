@@ -1,56 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
     <suppress>
-        <notes>Using latest version, no fix yet</notes>
-        <cve>CVE-2019-16869</cve>
-        <cve>CVE-2019-14540</cve>
-        <cve>CVE-2019-16335</cve>
-        <cve>CVE-2014-3488</cve>
-        <cve>CVE-2015-2156</cve>
-        <cve>CVE-2019-9658</cve>
-        <cve>CVE-2019-10102</cve>
-        <cve>CVE-2019-10101</cve>
-        <cve>CVE-2019-10103</cve>
-        <cve>CVE-2018-1258</cve>
-        <cve>CVE-2018-10237</cve>
-        <cve>CVE-2018-1000613</cve>
-        <cve>CVE-2017-13098</cve>
-        <cve>CVE-2018-1000180</cve>
-        <cve>CVE-2019-12814</cve>
-        <cve>CVE-2017-15288</cve>
-        <cve>CVE-2015-9251</cve>
-        <cve>CVE-2012-6708</cve>
-        <cve>CVE-2019-11358</cve>
-        <cve>CVE-2016-7103</cve>
-        <cve>CVE-2010-5312</cve>
-        <cve>CVE-2019-14379</cve>
-        <cve>CVE-2019-14439</cve>
-        <cve>CVE-2019-10086</cve>
-        <cve>CVE-2019-12384</cve>
-        <cve>CVE-2019-16335</cve>
-        <cve>CVE-2019-14540</cve>
-        <cve>CVE-2019-16869</cve>
-        <cve>CVE-2015-2156</cve>
-        <cve>CVE-2014-3488</cve>
-        <cve>CVE-2019-16942</cve>
-        <cve>CVE-2019-16943</cve>
-        <cve>CVE-2019-17267</cve>
-        <cve>CVE-2017-18365</cve>
-        <cve>CVE-2019-12418</cve>
-        <cve>CVE-2019-17563</cve>
-        <cve>CVE-2019-17195</cve>
-        <cve>CVE-2019-20445</cve>
-        <cve>CVE-2019-20444</cve>
         <cve>CVE-2019-10782</cve>
-        <cve>CVE-2019-10797</cve>
-        <cve>CVE-2019-17569</cve>
-        <cve>CVE-2020-1935</cve>
-        <cve>CVE-2020-1938</cve>
-        <cve>CVE-2020-11612</cve>
-        <cve>CVE-2020-9488</cve>
-        <cve>CVE-2020-1745</cve>
-        <cve>CVE-2020-5407</cve>
+        <cve>CVE-2019-9658</cve>
+        <cve>CVE-2019-10086</cve>
+        <cve>CVE-2020-5411</cve>
+        <cve>CVE-2018-1258</cve>
         <cve>CVE-2020-5408</cve>
-        <cve>CVE-2020-9484</cve>
+        <cve>CVE-2020-5407</cve>
+        <cve>CVE-2019-17195</cve>
+        <cve>CVE-2020-9488</cve>
+        <cve>CVE-2020-13934</cve>
+        <cve>CVE-2020-13935</cve>
+        <cve>CVE-2007-5615</cve>
+        <cve>CVE-2020-11612</cve>
+        <cve>CVE-2020-15824</cve>
+        <cve>CVE-2017-18640</cve>
+        <cve>CVE-2020-5421</cve>
     </suppress>
 </suppressions>

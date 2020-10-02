@@ -8,7 +8,6 @@ sort:
   field: /documentDateAdded
   order: ascending
 hasFolderCoversheets: false
-paginationStyle: topCenter
 pageNumberFormat: numberOfPages
 documentNameValue: /documentFileName
 folders:
