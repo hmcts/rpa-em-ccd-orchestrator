@@ -89,9 +89,9 @@ public class AutomatedCaseUpdaterTest {
         Mockito.when(mockRequest.getReader())
                 .thenReturn(
                         new BufferedReader(
-                                new StringReader("{\"case_details\":{ \"id\": \"1\", \"case_data\": {\"bundleConfiguration\":\"sscs-bundle-config.yaml\", \"caseBundles\": []}}}")
-                        )
-                );
+                                new StringReader("{\"case_details\":{ \"id\": \"1\", \"case_data\": "
+                                    + "{\"bundleConfiguration\":\"sscs-bundle-config.yaml\", \"caseBundles\": []}}}"))
+                            );
 
         CcdCallbackDto ccdCallbackDto = ccdCallbackDtoCreator.createDto(mockRequest, "caseBundles");
         updater.updateCase(ccdCallbackDto);

@@ -1,0 +1,78 @@
+title: Test Bundle
+filename: bundle.pdf
+filenameIdentifier: /case_details/id
+coverpageTemplate: CC-EDM-GOR-ENG-12345.docx
+hasTableOfContents: true
+hasCoversheets: true
+sort:
+  field: /fieldName
+  order: ascending
+hasFolderCoversheets: true
+paginationStyle: topCenter
+pageNumberFormat: numberOfPages
+enableEmailNotification: false
+documentImage:
+  docmosisAssetId: hmcts.png
+  imageRendering: opaque
+  imageRenderingLocation: allPages
+  coordinateX: 50
+  coordinateY: 50
+folders:
+  - name: Claimant Evidence
+    folders:
+      - name: Expert Reports
+        folders:
+          - name: Witness Reports
+            documents:
+              - type: documentSet
+                property: /caseDocuments
+                filters:
+                  - property: /documentType
+                    value: Witness Report
+                  - property: /ownerCaseRole
+                    value: Claimant
+          - name: Medical Reports
+            documents:
+              - type: documentSet
+                property: /caseDocuments
+                filters:
+                  - property: /documentType
+                    value: Medical Report
+                  - property: /ownerCaseRole
+                    value: Claimant
+      - name: Witness Statements
+        documents:
+          - type: documentSet
+            property: /caseDocuments
+            filters:
+              - property: /documentType
+                value: Witness Statement
+              - property: /ownerCaseRole
+                value: Claimant
+  - name: Defendant Evidence
+    folders:
+      - name: Witness Statements
+        documents:
+          - type: documentSet
+            property: /caseDocuments
+            filters:
+              - property: /documentType
+                value: Witness Statement
+              - property: /ownerCaseRole
+                value: Defendant
+      - name: Medical Reports
+        documents:
+          - type: documentSet
+            property: /caseDocuments
+            filters:
+              - property: /documentType
+                value: Medical Report
+              - property: /ownerCaseRole
+                value: Defendant
+  - name: Miscellaneous
+    documents:
+      - type: documentSet
+        property: /caseDocuments
+        filters:
+          - property: /documentType
+            value: Correspondence

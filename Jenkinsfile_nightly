@@ -6,8 +6,11 @@ properties([
         displayName: 'Evidence Management CCD Orchestrator',
         projectUrlStr: 'https://github.com/hmcts/rpa-em-ccd-orchestrator'
     ],
-    pipelineTriggers([
-        cron('H 05 * * *')
+    pipelineTriggers([cron('H 21 * * *')]), // scheduling to trigger jenkins job.
+    parameters([
+            string(name: 'SecurityRules',
+                    defaultValue: 'http://raw.githubusercontent.com/hmcts/security-test-rules/master/conf/security-rules.conf',
+                    description: 'The URL you want to run these tests against'),
     ])
 ])
 
@@ -15,15 +18,17 @@ properties([
 
 def type = "java"
 def product = "em"
-def component = "ccd-orchestrator"
+def component = "ccdorc"
 
 def secrets = [
         's2s-${env}': [
-                secret('microservicekey-em-gw', 'FUNCTIONAL_TEST_CLIENT_S2S_TOKEN')
+                secret('microservicekey-em-gw', 'FUNCTIONAL_TEST_CLIENT_S2S_TOKEN'),
+                secret('microservicekey-ccd-gw', 'FUNCTIONAL_TEST_CCD_GW_SERVICE_SECRET')
         ],
         'rpa-${env}': [
                 secret('show-oauth2-token', 'FUNCTIONAL_TEST_CLIENT_OAUTH_SECRET')
-        ]]
+        ]
+]
 
 static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
     [ $class: 'AzureKeyVaultSecret',
@@ -40,7 +45,22 @@ def vaultOverrides = [
 ]
 
 withNightlyPipeline(type, product, component) {
-    enableDockerBuild()
-    loadVaultSecrets(secrets)
+    env.IDAM_API_BASE_URI = 'https://idam-api.aat.platform.hmcts.net'
+    env.OPEN_ID_API_BASE_URI = 'https://idam-web-public.aat.platform.hmcts.net/o'
+    env.S2S_BASE_URI = 'http://rpe-service-auth-provider-aat.service.core-compute-aat.internal'
+    env.IDAM_WEBSHOW_WHITELIST = 'https://em-show-aat.service.core-compute-aat.internal/oauth2/callback'
+    env.EM_STITCHING_API_URL = 'http://em-stitching-aat.service.core-compute-aat.internal'
+    env.DM_STORE_APP_URL = 'http://dm-store-aat.service.core-compute-aat.internal'
+    env.CCD_DEF_API = 'http://ccd-definition-store-api-aat.service.core-compute-aat.internal'
+    env.CCD_DATA_API = 'http://ccd-data-store-api-aat.service.core-compute-aat.internal'
+
+    env.TEST_URL = "http://em-ccd-orchestrator-aat.service.core-compute-aat.internal"
+
     overrideVaultEnvironments(vaultOverrides)
+    loadVaultSecrets(secrets)
+    enableMutationTest()
+    enableFullFunctionalTest()
+    enableSecurityScan()
+
+    enableSlackNotifications('#em-dev-chat')
 }

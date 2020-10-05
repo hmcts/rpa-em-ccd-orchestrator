@@ -31,6 +31,7 @@ public class BundleConfiguration {
     public final String documentNameValue;
     public final Boolean enableEmailNotification;
     public final DocumentImage documentImage;
+    public final String documentLinkValue;
 
     public BundleConfiguration(@JsonProperty("title") String title,
                                @JsonProperty("filename") String filename,
@@ -46,7 +47,8 @@ public class BundleConfiguration {
                                @JsonProperty("paginationStyle") CcdBundlePaginationStyle paginationStyle,
                                @JsonProperty("documentNameValue") String documentNameValue,
                                @JsonProperty("documentImage") DocumentImage documentImage,
-                               @JsonProperty("enableEmailNotification") Boolean enableEmailNotification) {
+                               @JsonProperty("enableEmailNotification") Boolean enableEmailNotification,
+                               @JsonProperty("documentLinkValue") String documentLinkValue) {
 
         this.title = title;
         this.filename = ensurePdfExtension(filename);
@@ -63,5 +65,6 @@ public class BundleConfiguration {
         this.documentNameValue = documentNameValue;
         this.documentImage = documentImage;
         this.enableEmailNotification = enableEmailNotification;
+        this.documentLinkValue = documentLinkValue;
     }
 }

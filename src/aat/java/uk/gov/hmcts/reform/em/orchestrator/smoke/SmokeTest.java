@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.em.orchestrator.smoke;
 
 import io.restassured.RestAssured;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,8 @@ import uk.gov.hmcts.reform.em.EmTestConfig;
 @RunWith(SpringRunner.class)
 public class SmokeTest {
 
+    private static final String MESSAGE = "Welcome to EM Ccd Orchestrator API!";
+
     @Value("${test.url}")
     private String testUrl;
 
@@ -22,10 +25,12 @@ public class SmokeTest {
 
         RestAssured.useRelaxedHTTPSValidation();
 
-        RestAssured.given()
-            .request("GET", testUrl + "/health")
+        String response = RestAssured.given()
+            .request("GET", testUrl + "/")
             .then()
-            .statusCode(200);
+            .statusCode(200).extract().body().asString();
+
+        Assert.assertEquals(MESSAGE, response);
 
 
     }
