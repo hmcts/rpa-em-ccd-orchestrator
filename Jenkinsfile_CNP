@@ -49,7 +49,6 @@ env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
 
 def vaultOverrides = [
         'preview' : 'aat',
-        'perftest' : 'aat',
         'spreview': 'saat'
 ]
 
