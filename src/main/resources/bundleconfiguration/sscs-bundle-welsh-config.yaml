@@ -1,0 +1,33 @@
+title: SSCS Bundle
+filename: SscsBundle.pdf
+filenameIdentifier: /case_details/id
+coverpageTemplate: SSCS-cover-page.docx
+hasTableOfContents: true
+hasCoversheets: true
+sort:
+  field: /documentDateAdded
+  order: ascending
+hasFolderCoversheets: true
+pageNumberFormat: numberOfPages
+documentNameValue: /documentFileName
+folders:
+  - name: DWP
+    documents:
+      - type: document
+        property: /dwpResponseDocument
+      - type: document
+        property: /dwpEvidenceBundleDocument
+  - name: Original Documents
+    documents:
+      - type: documentSet
+        property: /sscsDocument
+        filters:
+          - property: /bundleAddition
+            value: \w+
+  - name:  Translated Documents
+    documents:
+      - type: documentSet
+        property: /sscsWelshDocuments
+        filters:
+          - property: /bundleAddition
+            value: \w+

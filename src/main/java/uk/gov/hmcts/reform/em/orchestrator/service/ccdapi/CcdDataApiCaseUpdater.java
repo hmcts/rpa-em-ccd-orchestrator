@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.em.orchestrator.service.ccdapi;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,8 @@ import java.io.IOException;
 
 @Service
 public class CcdDataApiCaseUpdater {
+
+    private final Logger log = LoggerFactory.getLogger(CcdDataApiCaseUpdater.class);
 
     private final OkHttpClient http;
     private final AuthTokenGenerator authTokenGenerator;
@@ -50,6 +54,8 @@ public class CcdDataApiCaseUpdater {
                     .url(String.format(ccdDataBaseUrl + ccdUpdateCasePath, ccdCallbackDto.getCaseId()))
                     .method("POST", body)
                     .build();
+
+            log.info(String.format("Ccd Update URL :  %s", updateRequest.url()));
 
             final Response updateResponse = http.newCall(updateRequest).execute();
 
