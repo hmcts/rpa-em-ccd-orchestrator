@@ -2,5 +2,5 @@ version: 1
 update_configs:
   - package_manager: "java:gradle"
     directory: "/"
-    update_schedule: "monthly"
+    update_schedule: "weekly"
 
