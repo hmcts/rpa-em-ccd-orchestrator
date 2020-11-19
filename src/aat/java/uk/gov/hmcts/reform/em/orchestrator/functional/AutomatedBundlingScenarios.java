@@ -6,13 +6,12 @@ import io.restassured.response.Response;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.em.orchestrator.testutil.TestUtil;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 public class AutomatedBundlingScenarios extends BaseTest {
 
@@ -31,10 +30,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
 
     @Test
     public void testCreateBundle() {
-        Response response = testUtil.authRequest()
-            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .body(validJson)
-            .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(validJson);
 
         assertEquals(200, response.getStatusCode());
         assertEquals("New bundle", response.getBody().jsonPath().getString("data.caseBundles[0].value.title"));
@@ -47,10 +43,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
 
     @Test
     public void testInvalidConfig() {
-        Response response = testUtil.authRequest()
-            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .body(invalidJson)
-            .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(invalidJson);
 
         assertEquals(200, response.getStatusCode());
         assertEquals("Invalid configuration file entry in: does-not-exist.yaml" + "; Configuration file parameter(s) and/or parameter value(s)",
@@ -59,10 +52,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
 
     @Test
     public void testCorruptConfig() {
-        Response response = testUtil.authRequest()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(invalidConfigJson)
-                .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(invalidConfigJson);
 
         assertEquals(200, response.getStatusCode());
         assertEquals("Invalid configuration file entry in: example-incorrect-key.yaml" + "; Configuration file parameter(s) and/or parameter value(s)",
@@ -71,10 +61,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
 
     @Test
     public void testFilename() {
-        Response response = testUtil.authRequest()
-            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .body(filenameJson)
-            .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(filenameJson);
 
         assertEquals(200, response.getStatusCode());
         assertEquals("Bundle with filename", response.getBody().jsonPath().getString("data.caseBundles[0].value.title"));
@@ -83,10 +70,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
 
     @Test
     public void testTableOfContentsAndCoversheet() {
-        Response response = testUtil.authRequest()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(validJson)
-                .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(validJson);
 
         assertEquals(200, response.getStatusCode());
         assertEquals("Yes", response.getBody().jsonPath().getString("data.caseBundles[0].value.hasCoversheets"));
@@ -96,10 +80,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
 
     @Test
     public void testFolderCoversheets() {
-        Response response = testUtil.authRequest()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(filenameJson)
-                .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(filenameJson);
 
         assertEquals(200, response.getStatusCode());
         assertEquals("No", response.getBody().jsonPath().getString("data.caseBundles[0].value.hasCoversheets"));
@@ -109,10 +90,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
 
     @Test
     public void testSubSubfolders() {
-        Response response = testUtil.authRequest()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(validJson)
-                .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(validJson);
 
         assertEquals(200, response.getStatusCode());
         Assert.assertNull(response.getBody().jsonPath().getString("data.caseBundles[0].value.folders[0].value.folders[0].value.folders"));
@@ -124,10 +102,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
         String json = TestUtil.readFile("src/aat/resources/documents-case.json");
         json = json.replaceAll("configurationFile", "f-tests-1-flat-docs.yaml");
 
-        Response response = testUtil.authRequest()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(json)
-                .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(json);
 
         JsonPath responsePath = response.jsonPath();
 
@@ -145,10 +120,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
         String json = TestUtil.readFile("src/aat/resources/documents-case.json");
         json = json.replaceAll("configurationFile", "f-tests-2-filter-flat-docs.yaml");
 
-        Response response = testUtil.authRequest()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(json)
-                .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(json);
 
         JsonPath responsePath = response.jsonPath();
 
@@ -163,10 +135,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
         String json = TestUtil.readFile("src/aat/resources/documents-case.json");
         json = json.replaceAll("configurationFile", "f-tests-3-foldered-docs.yaml");
 
-        Response response = testUtil.authRequest()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(json)
-                .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(json);
 
         JsonPath responsePath = response.jsonPath();
 
@@ -186,10 +155,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
         String json = TestUtil.readFile("src/aat/resources/documents-case.json");
         json = json.replaceAll("configurationFile", "f-tests-4-filtered-foldered-docs.yaml");
 
-        Response response = testUtil.authRequest()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(json)
-                .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(json);
 
         JsonPath responsePath = response.jsonPath();
 
@@ -207,10 +173,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
         String json = TestUtil.readFile("src/aat/resources/documents-case.json");
         json = json.replaceAll("configurationFile", "f-tests-6-has-typo.yaml");
 
-        Response response = testUtil.authRequest()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(json)
-                .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(json);
 
         assertEquals(200, response.getStatusCode());
     }
@@ -219,10 +182,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
     public void testDefaultFallBackConfigurationFile() throws IOException {
         String json = TestUtil.readFile("src/aat/resources/documents-case.json");
 
-        Response response = testUtil.authRequest()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(json)
-                .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(json);
 
         assertEquals(200, response.getStatusCode());
     }
@@ -232,10 +192,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
         String json = TestUtil.readFile("src/aat/resources/documents-case.json");
         json = json.replaceAll("configurationFile", "f-tests-12-invalid-document-property.yaml");
 
-        Response response = testUtil.authRequest()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(json)
-                .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(json);
 
         JsonPath responsePath = response.jsonPath();
         assertEquals(200, response.getStatusCode());
@@ -247,10 +204,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
         String json = TestUtil.readFile("src/aat/resources/documents-case.json");
         json = json.replaceAll("configurationFile", "f-tests-7-not-a-single-doc.yaml");
 
-        Response response = testUtil.authRequest()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(json)
-                .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(json);
 
         assertTrue(response.prettyPrint().contains("Element is an array: /caseDocuments"));
     }
@@ -260,10 +214,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
         String json = TestUtil.readFile("src/aat/resources/documents-case.json");
         json = json.replaceAll("configurationFile", "f-tests-8-not-an-array.yaml");
 
-        Response response = testUtil.authRequest()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(json)
-                .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(json);
 
         assertTrue(response.prettyPrint().contains("Element is not an array: /singleDocument"));
     }
@@ -274,10 +225,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
         json = json.replaceAll("document_url", "incorrect_property_name");
         json = json.replaceAll("configurationFile", "f-tests-5-invalid-url.yaml");
 
-        Response response = testUtil.authRequest()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(json)
-                .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(json);
 
         assertTrue(response.prettyPrint().contains("Could not find the property /documentLink/document_url in the node"));
     }
@@ -287,10 +235,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
         String json = TestUtil.readFile("src/aat/resources/documents-case.json");
         json = json.replaceAll("configurationFile", "nonexistent.yaml");
 
-        Response response = testUtil.authRequest()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(json)
-                .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(json);
 
         assertTrue(response.getBody().print().contains("Invalid configuration file entry in: nonexistent.yaml"));
     }
@@ -300,10 +245,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
         String json = TestUtil.readFile("src/aat/resources/documents-case.json");
         json = json.replaceAll("configurationFile", "f-tests-9-multiple-filters.yaml");
 
-        Response response = testUtil.authRequest()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(json)
-                .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(json);
 
         JsonPath responsePath = response.jsonPath();
 
@@ -320,10 +262,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
         String json = TestUtil.readFile("src/aat/resources/documents-case.json");
         json = json.replaceAll("configurationFile", "f-tests-10-sorting.yaml");
 
-        Response response = testUtil.authRequest()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(json)
-                .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(json);
 
         JsonPath responsePath = response.jsonPath();
 
@@ -343,10 +282,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
         String json = TestUtil.readFile("src/aat/resources/documents-case.json");
         json = json.replaceAll("configurationFile", "f-tests-11-sorting.yaml");
 
-        Response response = testUtil.authRequest()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(json)
-                .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(json);
 
         JsonPath responsePath = response.jsonPath();
 
@@ -365,15 +301,12 @@ public class AutomatedBundlingScenarios extends BaseTest {
     public void testEnableEmailNotificationIsNull() throws IOException {
         String json = TestUtil.readFile("src/aat/resources/documents-case.json");
 
-        Response response = testUtil.authRequest()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(validJson)
-                .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(validJson);
 
         JsonPath responsePath = response.jsonPath();
 
         assertEquals(200, response.getStatusCode());
-        assertEquals(null, responsePath.getString("data.caseBundles[0].value.enableEmailNotification"));
+        assertNull(responsePath.getString("data.caseBundles[0].value.enableEmailNotification"));
 
     }
 
@@ -382,10 +315,7 @@ public class AutomatedBundlingScenarios extends BaseTest {
         String json = TestUtil.readFile("src/aat/resources/documents-case.json");
         json = json.replaceAll("configurationFile", "f-tests-13-render-image-flat-docs.yaml");
 
-        Response response = testUtil.authRequest()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(json)
-                .request("POST", testUtil.getTestUrl() + "/api/new-bundle");
+        Response response = postNewBundle(json);
 
         JsonPath responsePath = response.jsonPath();
 
@@ -395,5 +325,14 @@ public class AutomatedBundlingScenarios extends BaseTest {
         Assert.assertEquals("opaque", responsePath.getString("data.caseBundles[0].value.documentImage.imageRendering"));
         Assert.assertEquals(50, responsePath.getInt("data.caseBundles[0].value.documentImage.coordinateX"));
         Assert.assertEquals(50, responsePath.getInt("data.caseBundles[0].value.documentImage.coordinateY"));
+    }
+
+    private Response postNewBundle(Object requestBody) {
+        return testUtil
+                .authRequest()
+                .baseUri(testUtil.getTestUrl())
+                .contentType(APPLICATION_JSON_VALUE)
+                .body(requestBody)
+                .post("/api/new-bundle");
     }
 }
