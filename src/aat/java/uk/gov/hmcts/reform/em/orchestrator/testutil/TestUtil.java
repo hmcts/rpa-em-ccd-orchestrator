@@ -1,17 +1,13 @@
 package uk.gov.hmcts.reform.em.orchestrator.testutil;
 
-import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
+import net.serenitybdd.rest.SerenityRest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.em.orchestrator.domain.enumeration.ImageRendering;
 import uk.gov.hmcts.reform.em.orchestrator.domain.enumeration.ImageRenderingLocation;
-import uk.gov.hmcts.reform.em.orchestrator.service.dto.CcdBoolean;
-import uk.gov.hmcts.reform.em.orchestrator.service.dto.CcdBundleDTO;
-import uk.gov.hmcts.reform.em.orchestrator.service.dto.CcdBundleDocumentDTO;
-import uk.gov.hmcts.reform.em.orchestrator.service.dto.CcdDocument;
-import uk.gov.hmcts.reform.em.orchestrator.service.dto.CcdValue;
+import uk.gov.hmcts.reform.em.orchestrator.service.dto.*;
 import uk.gov.hmcts.reform.em.orchestrator.stitching.dto.DocumentImage;
 import uk.gov.hmcts.reform.em.test.dm.DmHelper;
 import uk.gov.hmcts.reform.em.test.idam.IdamHelper;
@@ -50,7 +46,7 @@ public class TestUtil {
     @PostConstruct
     public void init() {
         idamHelper.createUser(getUsername(), Stream.of("caseworker").collect(Collectors.toList()));
-        RestAssured.useRelaxedHTTPSValidation();
+        SerenityRest.useRelaxedHTTPSValidation();
         idamAuth = idamHelper.authenticateUser(getUsername());
         s2sAuth = s2sHelper.getS2sToken();
     }
@@ -75,7 +71,7 @@ public class TestUtil {
     }
 
     public RequestSpecification s2sAuthRequest() {
-        return RestAssured
+        return SerenityRest
                 .given()
                 .header("ServiceAuthorization", s2sAuth);
     }
@@ -197,7 +193,7 @@ public class TestUtil {
     }
 
     public RequestSpecification emptyIdamAuthAndEmptyS2SAuth() {
-        return RestAssured
+        return SerenityRest
                 .given()
                 .header("ServiceAuthorization", null)
                 .header("Authorization", null);
@@ -212,7 +208,7 @@ public class TestUtil {
     }
 
     private RequestSpecification emptyS2sAuthRequest() {
-        return RestAssured.given().header("ServiceAuthorization", null);
+        return SerenityRest.given().header("ServiceAuthorization", null);
     }
 
     public RequestSpecification invalidIdamAuthrequest() {
@@ -224,8 +220,7 @@ public class TestUtil {
     }
 
     private RequestSpecification invalidS2sAuthRequest() {
-        return RestAssured.given().header("ServiceAuthorization", "invalidS2SAuthorization");
+        return SerenityRest.given().header("ServiceAuthorization", "invalidS2SAuthorization");
     }
 
 }
-
