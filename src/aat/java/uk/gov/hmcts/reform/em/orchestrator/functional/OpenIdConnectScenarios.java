@@ -2,90 +2,92 @@ package uk.gov.hmcts.reform.em.orchestrator.functional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.restassured.response.Response;
-import java.io.IOException;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.em.orchestrator.service.dto.CcdBundleDTO;
 import uk.gov.hmcts.reform.em.orchestrator.service.dto.CcdValue;
 
+import java.io.IOException;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 public class OpenIdConnectScenarios extends BaseTest {
 
     public static final String API_STITCH_CCD_BUNDLES = "/api/stitch-ccd-bundles";
 
-    @Rule
-    public ExpectedException exceptionThrown = ExpectedException.none();
-
     @Test
     public void testValidAuthenticationAndAuthorisation() throws IOException {
         String wrappedJson = caseBundleJsonPayload();
 
-        Response response = testUtil.authRequest()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(wrappedJson)
-                .request("POST",testUtil.getTestUrl() + API_STITCH_CCD_BUNDLES);
+        Response response =
+                testUtil
+                        .authRequest()
+                        .baseUri(testUtil.getTestUrl())
+                        .contentType(APPLICATION_JSON_VALUE)
+                        .body(wrappedJson)
+                        .post(API_STITCH_CCD_BUNDLES);
 
-        assertEquals(200,response.getStatusCode());
-
+        assertEquals(200, response.getStatusCode());
     }
 
     @Test
     // Invalid S2SAuth
-    public void testInvalidS2SAuth() throws IOException, InterruptedException {
+    public void testInvalidS2SAuth() throws IOException {
         String wrappedJson = caseBundleJsonPayload();
 
-        Response response = testUtil.invalidS2SAuth()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(wrappedJson)
-                .request("POST",testUtil.getTestUrl() + API_STITCH_CCD_BUNDLES);
+        Response response =
+                testUtil
+                        .invalidS2SAuth()
+                        .baseUri(testUtil.getTestUrl())
+                        .contentType(APPLICATION_JSON_VALUE)
+                        .body(wrappedJson)
+                        .post(API_STITCH_CCD_BUNDLES);
 
-        assertEquals(response.getStatusCode(),401);
+        assertEquals(response.getStatusCode(), 401);
     }
 
     @Test
     // Invalid S2SAuth
-    public void testWithInvalidIdamAuth() throws IOException, InterruptedException {
+    public void testWithInvalidIdamAuth() throws IOException {
         String wrappedJson = caseBundleJsonPayload();
 
-        Response response = testUtil.invalidS2SAuth()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .body(wrappedJson)
-                .request("POST", testUtil.getTestUrl() + API_STITCH_CCD_BUNDLES);
+        Response response =
+                testUtil
+                        .invalidS2SAuth()
+                        .baseUri(testUtil.getTestUrl())
+                        .contentType(APPLICATION_JSON_VALUE)
+                        .body(wrappedJson)
+                        .post(API_STITCH_CCD_BUNDLES);
 
-        assertEquals(response.getStatusCode(),401);
+        assertEquals(response.getStatusCode(), 401);
     }
 
     @Test
     // Empty IdamAuth and Valid S2S Auth
-    public void testWithEmptyIdamAuthAndValidS2SAuth() throws IOException, InterruptedException {
+    public void testWithEmptyIdamAuthAndValidS2SAuth() throws IOException {
         String wrappedJson = caseBundleJsonPayload();
 
-        exceptionThrown.expect(IllegalArgumentException.class);
-
-        Response response = testUtil.validS2SAuthWithEmptyIdamAuth()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+        assertThrows(NullPointerException.class, () -> testUtil.validS2SAuthWithEmptyIdamAuth()
+                .baseUri(testUtil.getTestUrl())
+                .contentType(APPLICATION_JSON_VALUE)
                 .body(wrappedJson)
-                .request("POST", testUtil.getTestUrl() + "/api/stitch-ccd-bundles");
+                .post("/api/stitch-ccd-bundles"));
 
     }
 
     @Test
     // Empty IdamAuth and Empty S2SAuth
-    public void testIdamAuthAndS2SAuthAreEmpty() throws IOException, InterruptedException {
+    public void testIdamAuthAndS2SAuthAreEmpty() throws IOException {
         String wrappedJson = caseBundleJsonPayload();
 
-        exceptionThrown.expect(IllegalArgumentException.class);
-
-        Response response = testUtil.emptyIdamAuthAndEmptyS2SAuth()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+        assertThrows(NullPointerException.class, () -> testUtil.emptyIdamAuthAndEmptyS2SAuth()
+                .baseUri(testUtil.getTestUrl())
+                .contentType(APPLICATION_JSON_VALUE)
                 .body(wrappedJson)
-                .request("POST",testUtil.getTestUrl() + "/api/stitch-ccd-bundles");
+                .post("/api/stitch-ccd-bundles"));
 
     }
-
 
     private String caseBundleJsonPayload() throws JsonProcessingException {
         CcdBundleDTO bundle = testUtil.getTestBundle();
@@ -94,3 +96,4 @@ public class OpenIdConnectScenarios extends BaseTest {
     }
 
 }
+

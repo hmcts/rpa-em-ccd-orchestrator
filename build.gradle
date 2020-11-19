@@ -59,7 +59,8 @@ repositories {
 def versions = [
         serenity           : '2.3.6',
         serenityreporter   : '2.3.6',
-        springfoxSwagger   : '3.0.0',
+        serenityRestAssured: '2.3.4',
+        springfoxSwagger   : '2.9.2',
         pact_version       : '4.0.10',
         logging            : '5.1.7',
         pitest             : '1.5.1',
@@ -165,7 +166,7 @@ dependencies {
     testCompile group: 'org.mockito', name: 'mockito-core', version: '3.6.0'
     testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.6.0'
 
-    testCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity, withoutStuff
+    testCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenityRestAssured, withoutStuff
     testCompile group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity, withoutStuff
     testCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
     testCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: versions.serenity
