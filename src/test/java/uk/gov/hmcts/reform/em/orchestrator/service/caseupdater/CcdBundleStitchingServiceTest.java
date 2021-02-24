@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.em.orchestrator.config.Constants;
 import uk.gov.hmcts.reform.em.orchestrator.service.ccdcallbackhandler.CcdCallbackDto;
 import uk.gov.hmcts.reform.em.orchestrator.service.dto.CcdBundleDTO;
 import uk.gov.hmcts.reform.em.orchestrator.service.dto.CcdDocument;
@@ -106,6 +107,40 @@ public class CcdBundleStitchingServiceTest {
         ccdCallbackDto.setCaseData(objectMapper.getNodeFactory().arrayNode());
         JsonNode node = ccdBundleStitchingService.updateCase(ccdCallbackDto);
         assertNull(node.get(0));
+    }
+
+    @Test
+    public void testUpdateCaseFileNameOneChar() throws Exception {
+
+        try {
+            CcdCallbackDto ccdCallbackDto = new CcdCallbackDto();
+            JsonNode node = objectMapper.readTree("{\"cb\":[{\"value\":{\"eligibleForStitching\":\"yes\", "
+                + "\"fileName\":\"a\"}}]}");
+            ccdCallbackDto.setPropertyName(Optional.of("cb"));
+            ccdCallbackDto.setCaseData(node);
+            ccdCallbackDto.setJwt("jwt");
+
+            ccdBundleStitchingService.updateCase(ccdCallbackDto);
+        } catch (InputValidationException exc) {
+            assertEquals(Constants.STITCHED_FILE_NAME_FIELD_LENGTH_ERROR_MSG,exc.getViolations().get(0));
+        }
+    }
+
+    @Test
+    public void testUpdateCaseFileName51Char() throws Exception {
+
+        try {
+            CcdCallbackDto ccdCallbackDto = new CcdCallbackDto();
+            JsonNode node = objectMapper.readTree("{\"cb\":[{\"value\":{\"eligibleForStitching\":\"yes\", "
+                + "\"fileName\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}}]}");
+            ccdCallbackDto.setPropertyName(Optional.of("cb"));
+            ccdCallbackDto.setCaseData(node);
+            ccdCallbackDto.setJwt("jwt");
+
+            ccdBundleStitchingService.updateCase(ccdCallbackDto);
+        } catch (InputValidationException exc) {
+            assertEquals(Constants.STITCHED_FILE_NAME_FIELD_LENGTH_ERROR_MSG,exc.getViolations().get(0));
+        }
     }
 
 }

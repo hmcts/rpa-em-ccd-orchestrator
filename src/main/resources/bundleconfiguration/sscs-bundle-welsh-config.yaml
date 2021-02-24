@@ -1,5 +1,5 @@
 title: SSCS Bundle
-filename: SscsBundle.pdf
+filename: SscsBundle
 filenameIdentifier: /case_details/id
 coverpageTemplate: SSCS-cover-page.docx
 hasTableOfContents: true
@@ -13,10 +13,16 @@ documentNameValue: /documentFileName
 folders:
   - name: DWP
     documents:
-      - type: document
-        property: /dwpResponseDocument
-      - type: document
-        property: /dwpEvidenceBundleDocument
+      - type: documentSet
+        property: /dwpDocuments
+        filters:
+          - property: /documentType
+            value: dwpResponse
+      - type: documentSet
+        property: /dwpDocuments
+        filters:
+          - property: /documentType
+            value: dwpEvidenceBundle
   - name: Original Documents
     documents:
       - type: documentSet

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
+import uk.gov.hmcts.reform.em.orchestrator.config.Constants;
 import uk.gov.hmcts.reform.em.orchestrator.domain.enumeration.PageNumberFormat;
 import uk.gov.hmcts.reform.em.orchestrator.stitching.dto.DocumentImage;
 
@@ -25,7 +26,7 @@ public class CcdBundleDTO {
     private List<CcdValue<CcdBundleDocumentDTO>> documents = new LinkedList<>();
     private List<CcdValue<CcdBundleFolderDTO>> folders = new LinkedList<>();
 
-    @Size(min = 2, max = 30)
+    @Size(min = 2, max = 50, message = Constants.STITCHED_FILE_NAME_FIELD_LENGTH_ERROR_MSG)
     @Pattern(regexp = "^[-._A-Za-z0-9]*$")
     private String fileName;
     private String fileNameIdentifier;

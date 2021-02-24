@@ -4,7 +4,9 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.junit.Assert;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import uk.gov.hmcts.reform.em.test.retry.RetryRule;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +18,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class CcdPrehookScenarios extends BaseTest {
 
     private final File jsonFile = new File(ClassLoader.getSystemResource("prehook-case.json").getPath());
+
+    @Rule
+    public RetryRule retryRule = new RetryRule(3);
 
     @Test
     public void testPostBundleStitch() {
