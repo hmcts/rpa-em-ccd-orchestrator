@@ -1,5 +1,5 @@
 title: SSCS Bundle
-filename: SscsBundle
+filename: EditedSscsBundle.pdf
 filenameIdentifier: /case_details/id
 coverpageTemplate: SSCS-cover-page.docx
 hasTableOfContents: true
@@ -10,6 +10,7 @@ sort:
 hasFolderCoversheets: false
 pageNumberFormat: numberOfPages
 documentNameValue: /documentFileName
+documentLinkValue: /editedDocumentLink
 folders:
   - name: DWP
     documents:
