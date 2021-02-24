@@ -22,5 +22,11 @@
   "10054_Cookie Without SameSite Attribute_http://em-ccd-orchestrator-aat.service.core-compute-aat.internal/api/async-stitch-ccd-bundles_POST": "ignore",
   "10054_Cookie Without SameSite Attribute_http://em-ccd-orchestrator-aat.service.core-compute-aat.internal/api/stitch-ccd-bundles_POST": "ignore",
   "10021_X-Content-Type-Options Header Missing_http://em-ccd-orchestrator-aat.service.core-compute-aat.internal/v2/api-docs_GET": "ignore",
-  "10010_Cookie No HttpOnly Flag_http://em-ccd-orchestrator-aat.service.core-compute-aat.internal/api/clone-ccd-bundles_POST": "ignore"
+  "10010_Cookie No HttpOnly Flag_http://em-ccd-orchestrator-aat.service.core-compute-aat.internal/api/clone-ccd-bundles_POST": "ignore",
+  "10096_Timestamp Disclosure - Unix_http://em-ccd-orchestrator-aat.service.core-compute-aat.internal/api/stitching-complete-callback/caseId/triggerId/bundleId_POST": "ignore",
+  "10096_Timestamp Disclosure - Unix_http://em-ccd-orchestrator-aat.service.core-compute-aat.internal/api/clone-ccd-bundles_POST": "ignore",
+  "10096_Timestamp Disclosure - Unix_http://em-ccd-orchestrator-aat.service.core-compute-aat.internal/v2/api-docs_GET": "ignore",
+  "10096_Timestamp Disclosure - Unix_http://em-ccd-orchestrator-aat.service.core-compute-aat.internal/api/new-bundle_POST": "ignore",
+  "10096_Timestamp Disclosure - Unix_http://em-ccd-orchestrator-aat.service.core-compute-aat.internal/api/async-stitch-ccd-bundles_POST": "ignore",
+  "10096_Timestamp Disclosure - Unix_http://em-ccd-orchestrator-aat.service.core-compute-aat.internal/api/stitch-ccd-bundles_POST": "ignore"
 }

@@ -3,9 +3,11 @@ package uk.gov.hmcts.reform.em.orchestrator.functional;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
 import uk.gov.hmcts.reform.em.orchestrator.service.dto.CcdBundleDTO;
 import uk.gov.hmcts.reform.em.orchestrator.service.dto.CcdValue;
+import uk.gov.hmcts.reform.em.test.retry.RetryRule;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,6 +16,9 @@ import java.util.List;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 public class CcdCloneScenarios extends BaseTest {
+
+    @Rule
+    public RetryRule retryRule = new RetryRule(3);
 
     @Test
     public void testSingleBundleClone() throws IOException {

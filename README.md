@@ -8,14 +8,23 @@ CCD Orchestrator is a backend service that facilitates interactions between CCD,
 
 # Setup
 Install `https://stedolan.github.io/jq/`
-For linux: `sudo apt-get install jq`. 
-For mac: `brew install jq`.
+
+For linux: `sudo apt-get install jq`
+
+For mac: `brew install jq`
 
 Then run:
 ```
+git clone https://github.com/hmcts/rpa-em-ccd-orchestrator.git
+cd rpa-em-ccd-orchestrator
+
 az login
 az acr login --name hmctspublic && az acr login --name hmctsprivate
+
+docker-compose -f docker-compose-dependencies.yml pull
+
 ./gradlew assemble
+
 ./bin/start-local-environment.sh <DOCMOSIS_ACCESS_KEY>
 ```
 
@@ -35,20 +44,6 @@ It uses:
 
 ### Plugins
 * [lombok plugin](https://plugins.jetbrains.com/idea/plugin/6317-lombok-plugin) - Lombok IDEA plugin
-
-## Quickstart
-```bash
-#Cloning repo and running though docker
-git clone https://github.com/hmcts/rpa-em-ccd-orchestrator.git
-cd rpa-em-ccd-orchestrator/
-./buildrundm-docker.sh
-```
-
-```bash
-#Run this script to acquire IDAM credentials required for DM API.
-./idam.sh
-```
-
 
 ### Swagger UI
 To view our REST API go to {HOST}:{PORT}/swagger-ui.html

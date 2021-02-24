@@ -1,22 +1,22 @@
 buildscript {
     dependencies {
-        classpath("net.serenity-bdd:serenity-gradle-plugin:2.3.6")
-        classpath("net.serenity-bdd:serenity-single-page-report:2.3.6")
+        classpath("net.serenity-bdd:serenity-gradle-plugin:2.3.13")
+        classpath("net.serenity-bdd:serenity-single-page-report:2.3.13")
     }
 }
 
 plugins {
     id 'application'
-    id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'org.springframework.boot' version '2.3.4.RELEASE'
-    id 'uk.gov.hmcts.java' version '0.12.1'
-    id 'com.github.ben-manes.versions' version '0.34.0'
-    id 'org.sonarqube' version '3.0'
+    id 'uk.gov.hmcts.java' version '0.12.5'
+    id 'com.github.ben-manes.versions' version '0.36.0'
+    id 'org.sonarqube' version '3.1.1'
     id 'jacoco'
     id 'checkstyle'
     id 'pmd'
     id 'io.franzbecker.gradle-lombok' version '4.0.0'
-    id 'au.com.dius.pact' version '4.1.2'
+    id 'au.com.dius.pact' version '4.1.8'
     id "info.solidsoft.pitest" version '1.5.1'
 }
 
@@ -57,8 +57,8 @@ repositories {
 }
 
 def versions = [
-        serenity           : '2.3.6',
-        serenityreporter   : '2.3.6',
+        serenity           : '2.3.13',
+        serenityreporter   : '2.3.13',
         serenityRestAssured: '2.3.4',
         springfoxSwagger   : '2.9.2',
         pact_version       : '4.0.10',
@@ -96,14 +96,11 @@ configurations.all {
     resolutionStrategy {
         eachDependency { DependencyResolveDetails details ->
             if (details.requested.group in ['org.apache.tomcat.embed']) {
-                details.useVersion '9.0.37'
+                details.useVersion '9.0.40'
             }
             if (details.requested.name in ['spring-boot-actuator, spring-boot-actuator-autoconfigure, ' +
                                                    'spring-boot-autoconfigure, spring-data-commons']) {
                 details.useVersion '2.3.4.RELEASE'
-            }
-            if (details.requested.group in ['org.projectlombok']) {
-                details.useVersion '1.18.16'
             }
         }
     }
@@ -117,16 +114,24 @@ dependencies {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-test'
     }
     
-    aatCompileOnly 'org.projectlombok:lombok:1.18.16'
-    aatAnnotationProcessor 'org.projectlombok:lombok:1.18.16'
-    compile "com.squareup.okhttp3:okhttp:4.9.0"
-    compile group: 'com.squareup.okhttp3', name: 'logging-interceptor', version: '4.9.0'
+    def withoutAlpnApi = {
+        exclude group: 'org.eclipse.jetty.alpn', module: 'alpn-api'
+    }
+    
+    compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '10.0.0'
+    compile group: 'com.google.guava', name: 'guava', version: '30.1-jre'
+    
+    compile group:'org.projectlombok', name: 'lombok', version: '1.18.18'
+
+    compile "com.squareup.okhttp3:okhttp:4.9.1"
+    compile group: 'com.squareup.okhttp3', name: 'logging-interceptor', version: '4.9.1'
     compile group: "commons-io", name: "commons-io", version: "2.8.0"
     compile "org.springframework.boot:spring-boot-starter-batch"
     compile "org.springframework.boot:spring-boot-starter-security"
     compile "org.springframework.boot:spring-boot-starter-web"
     compile "org.springframework.boot:spring-boot-starter-actuator"
-
+    compile 'org.springframework.boot:spring-boot-starter-validation'
+    
     compile group:'com.fasterxml.jackson.datatype', name: 'jackson-datatype-json-org', version: versions.fasterXmlJackson
     compile group:'com.fasterxml.jackson.datatype', name: 'jackson-datatype-hppc', version: versions.fasterXmlJackson
     compile group:'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: versions.fasterXmlJackson
@@ -137,34 +142,35 @@ dependencies {
     compile group:'com.fasterxml.jackson.module', name: 'jackson-module-afterburner', version: versions.fasterXmlJackson
     
     compile "pl.touk:throwing-function:1.3"
-    compile "com.jayway.jsonpath:json-path:2.4.0"
+    compile "com.jayway.jsonpath:json-path:2.5.0"
     compile "org.zalando:problem-spring-web:0.26.2"
     compile("io.springfox:springfox-swagger2:${versions.springfoxSwagger}")
     compile("io.springfox:springfox-swagger-ui:${versions.springfoxSwagger}")
     compile group: "org.apache.commons", name: "commons-lang3", version: "3.11"
     compile group: "commons-validator", name: "commons-validator", version: "1.7"
     compile group: "uk.gov.hmcts.reform.auth", name: "auth-checker-lib", version: "2.1.4"
-    compile group: "uk.gov.hmcts.reform", name: "service-auth-provider-client", version: "3.1.2"
+    compile group: "uk.gov.hmcts.reform", name: "service-auth-provider-client", version: "3.1.4"
     compile group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.logging
     compile group: 'uk.gov.hmcts.reform', name: 'logging-spring', version: versions.logging
     compile group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.logging
-    compile "org.hibernate.validator:hibernate-validator:6.1.6.Final"
     compile group: "uk.gov.hmcts.reform", name: "properties-volume-spring-boot-starter", version:"0.1.0"
+
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
+    compile group: 'org.apache.httpcomponents', name: 'fluent-hc', version: '4.5.13'
 
     compile "org.springframework.boot:spring-boot-starter-oauth2-resource-server"
     compile "org.springframework.boot:spring-boot-starter-oauth2-client"
     compile "io.github.openfeign:feign-httpclient:11.0"
     compile group: 'javax.el', name: 'javax.el-api', version: '3.0.0'
     compile group: 'uk.gov.service.notify', name: 'notifications-java-client', version: '3.17.0-RELEASE'
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.16'
+
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor", withoutStuff
 
     testCompile "org.springframework.boot:spring-boot-starter-test", withoutStuff
-    testCompile group: "junit", name: "junit", version: "4.13"
     testCompile "com.github.gmazzo:okhttp-mock:1.3.2"
     testCompile "com.github.gmazzo:okhttp-mock:1.3.1"
-    testCompile group: 'org.mockito', name: 'mockito-core', version: '3.6.0'
-    testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.6.0'
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '3.7.7'
+    testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.6.28'
 
     testCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenityRestAssured, withoutStuff
     testCompile group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity, withoutStuff
@@ -173,27 +179,56 @@ dependencies {
     testCompile group: 'net.serenity-bdd', name: 'serenity-single-page-report', version: versions.serenityreporter
 
 
-    testCompile "org.junit.jupiter:junit-jupiter-api:5.3.2"
-    testRuntime "org.junit.jupiter:junit-jupiter-engine:5.3.2"
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.3.2"
+    testCompile "org.junit.jupiter:junit-jupiter-api:5.6.3"
+    testRuntime "org.junit.jupiter:junit-jupiter-engine:5.6.3"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.3"
 
-    aatCompile group: 'org.apache.poi', name: 'poi', version: '4.1.2'
-    aatCompile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2'
+    aatCompile group: 'org.apache.poi', name: 'poi', version: '5.0.0'
+    aatCompile group: 'org.apache.poi', name: 'poi-ooxml', version: '5.0.0'
 
     //pact contract testing
-    contractTestCompile group: 'au.com.dius', name: 'pact-jvm-consumer-junit', version: versions.pact_version
-    contractTestCompile group: 'au.com.dius', name: 'pact-jvm-consumer-junit5', version: versions.pact_version
-    contractTestCompile group: 'au.com.dius', name: 'pact-jvm-consumer-java8', version: versions.pact_version
-    compile group: 'au.com.dius', name: 'pact-jvm-consumer', version: versions.pact_version
+    contractTestCompile group: 'au.com.dius', name: 'pact-jvm-consumer-junit', version: versions.pact_version, withoutAlpnApi
+    contractTestCompile group: 'au.com.dius', name: 'pact-jvm-consumer-junit5', version: versions.pact_version, withoutAlpnApi
+    contractTestCompile group: 'au.com.dius', name: 'pact-jvm-consumer-java8', version: versions.pact_version, withoutAlpnApi
+    compile group: 'au.com.dius', name: 'pact-jvm-consumer', version: versions.pact_version, withoutAlpnApi
 
-    contractTestCompile("org.junit.jupiter:junit-jupiter-api:5.3.2")
-    contractTestRuntime("org.junit.jupiter:junit-jupiter-engine:5.3.2")
-    contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.3.2')
+    contractTestCompile("org.junit.jupiter:junit-jupiter-api:5.6.3")
+    contractTestRuntime("org.junit.jupiter:junit-jupiter-engine:5.6.3")
+    contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.6.3')
 
     contractTestCompile sourceSets.main.runtimeClasspath
     contractTestCompile sourceSets.test.runtimeClasspath
 
-    aatCompile "uk.gov.hmcts.reform:em-test-helper:1.17.6", withoutStuff
+    aatCompile "uk.gov.hmcts.reform:em-test-helper:1.18.1", withoutStuff
+}
+
+dependencyManagement {
+    dependencies {
+
+        dependencySet(group: 'org.jetbrains.kotlin', version: '1.4.30') {
+            entry 'kotlin'
+            entry 'kotlin-stdlib'
+            entry 'kotlin-reflect'
+            entry 'kotlin-stdlib-common'
+            entry 'kotlin-stdlib-jdk7'
+            entry 'kotlin-stdlib-jdk8'
+        }
+
+        //CVE-2021-21290
+        dependencySet(group: 'io.netty', version: '4.1.59.Final') {
+            entry 'netty-buffer'
+            entry 'netty-codec'
+            entry 'netty-common'
+            entry 'netty-handler'
+            entry 'netty-resolver'
+            entry 'netty-transport'
+            entry 'netty-codec-http'
+            entry 'netty-codec-http2'
+            entry 'netty-transport-native-epoll'
+            entry 'netty-transport-native-kqueue'
+            entry 'netty-transport-native-unix-common'
+        }
+    }
 }
 
 checkstyle {

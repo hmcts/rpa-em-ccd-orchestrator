@@ -2,9 +2,11 @@ package uk.gov.hmcts.reform.em.orchestrator.functional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.restassured.response.Response;
+import org.junit.Rule;
 import org.junit.Test;
 import uk.gov.hmcts.reform.em.orchestrator.service.dto.CcdBundleDTO;
 import uk.gov.hmcts.reform.em.orchestrator.service.dto.CcdValue;
+import uk.gov.hmcts.reform.em.test.retry.RetryRule;
 
 import java.io.IOException;
 
@@ -15,6 +17,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class OpenIdConnectScenarios extends BaseTest {
 
     public static final String API_STITCH_CCD_BUNDLES = "/api/stitch-ccd-bundles";
+
+    @Rule
+    public RetryRule retryRule = new RetryRule(3);
 
     @Test
     public void testValidAuthenticationAndAuthorisation() throws IOException {
