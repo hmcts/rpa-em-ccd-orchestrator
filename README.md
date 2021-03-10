@@ -19,13 +19,12 @@ git clone https://github.com/hmcts/rpa-em-ccd-orchestrator.git
 cd rpa-em-ccd-orchestrator
 
 az login
-az acr login --name hmctspublic && az acr login --name hmctsprivate
+az acr login --name hmctspublic
 
-docker-compose -f docker-compose-dependencies.yml pull
+docker-compose -f docker-compose-dependencies-simulator.yml pull
+docker-compose -f docker-compose-dependencies-simulator.yml up
 
 ./gradlew assemble
-
-./bin/start-local-environment.sh <DOCMOSIS_ACCESS_KEY>
 ```
 
 

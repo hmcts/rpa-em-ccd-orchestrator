@@ -1,0 +1,320 @@
+---
+version: '3'
+
+services:
+  rpa-em-ccd-orchestrator:
+    build:
+      context: .
+    #        image: hmcts/rpa-em-ccd-orchestrator:latest
+    container_name: ccdorc-rpa-em-ccd-orchestrator
+    environment:
+      - SERVER_PORT=8080
+      - S2S_BASE_URI=http://service-auth-provider-api:8489
+      - IDAM_API_BASE_URI=http://idam-api:8080
+      - OPEN_ID_API_BASE_URI=http://idam-api:5000/o
+      - DM_STORE_APP_URL=http://dm-store:8080
+      - EM_STITCHING_API_URL=http://stitching-api:8080
+      - CALLBACK_DOMAIN=rpa-em-ccd-orchestrator
+      - CCD_DATA_API_URL=http://ccd-data-store-api:4452
+      - ENABLE_LIQUIBASE=true
+      - APPINSIGHTS_INSTRUMENTATIONKEY=test-key
+      # these environment variables are used by java-logging library
+      - JSON_CONSOLE_PRETTY_PRINT=false
+      - ROOT_LOGGING_LEVEL
+      - REFORM_SERVICE_TYPE=java
+      - REFORM_SERVICE_NAME=rpa-em-ccd-orchestrator
+      - REFORM_TEAM=em-ccd-orchestrator
+      - REFORM_ENVIRONMENT=docker
+    ports:
+      - 8080:8080
+    depends_on:
+      - idam-api
+
+  service-auth-provider-api:
+    image: hmctspublic.azurecr.io/rpe/service-auth-provider:latest
+    container_name: ccdorc-service-auth-provider-api
+    environment:
+      - jwtKey=wThK0f0/lh3FlxFcL4xUWDMI5C1J9KyQBgXV4wseh1e5J1uYJIjvTvArHxQDrYoHJ23xFxjHkOnvNbR5dXRoxA==
+      #      - Add key for any microservice that will be used: orchestrator, stitching api, doc store
+      - microserviceKeys_em_gw=AAAAAAAAAAAAAAAA
+      - microserviceKeys_em_stitching_api=AAAAAAAAAAAAAAAA
+      - microserviceKeys_em_ccd_orchestrator=AAAAAAAAAAAAAAAA
+      - microserviceKeys_ccd_data=AAAAAAAAAAAAAAAA
+      - microserviceKeys_ccd_gw=AAAAAAAAAAAAAAAA
+      - microserviceKeys_ccd_definition=AAAAAAAAAAAAAAAA
+      - microserviceKeys_ccd_admin=AAAAAAAAAAAAAAAA
+      - microserviceKeys_fpl_case_service=AAAAAAAAAAAAAAAA
+      #      logging env vars
+      - JSON_CONSOLE_PRETTY_PRINT=false
+      - REFORM_SERVICE_TYPE=java
+      - REFORM_SERVICE_NAME=service-auth-provider-api
+      - REFORM_TEAM=rpe
+      - REFORM_ENVIRONMENT=docker
+      #      healthcheck env vars
+      - PACKAGES_ENVIRONMENT=docker
+      - PACKAGES_PROJECT=rpe
+      - PACKAGES_NAME=service-auth-provider-api
+      - PACKAGES_VERSION=unkown
+      - TESTING_SUPPORT_ENABLED=true
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx512m -XX:MaxPermSize=512m
+    ports:
+      - 4502:8489
+
+  idam-api:
+    image: hmctspublic.azurecr.io/hmcts/rse/rse-idam-simulator:latest
+    environment:
+      # these environment variables are used by java-logging library
+      ROOT_APPENDER:
+      JSON_CONSOLE_PRETTY_PRINT:
+      ROOT_LOGGING_LEVEL:
+      REFORM_SERVICE_TYPE:
+      REFORM_SERVICE_NAME:
+      REFORM_TEAM:
+      REFORM_ENVIRONMENT:
+      LOGBACK_DATE_FORMAT:
+      LOGBACK_REQUIRE_THREAD:
+      LOGBACK_REQUIRE_ALERT_LEVEL: "false"
+      LOGBACK_REQUIRE_ERROR_CODE: "false"
+      SERVER_PORT: 5000
+      SIMULATOR_OPENID_BASE_URL: http://localhost:5000
+
+    ports:
+      - 5000:5000
+
+  shared-database:
+    image: postgres
+    container_name: ccdorc-shared-database
+    volumes:
+      - ./database:/docker-entrypoint-initdb.d
+    environment:
+      - POSTGRES_MULTIPLE_DATABASES=idam,emstitch,evidence,ccd_data,ccd_user_profile,ccd_definition,ccd_definition_designer
+      - POSTGRES_USER=shared
+      - POSTGRES_PASSWORD=shared
+    ports:
+      - 5434:5432
+
+  stitching-api:
+    image: hmctspublic.azurecr.io/em/stitching:latest
+    container_name: ccdorc-stitching-api
+    healthcheck:
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://shared-database:5432/emstitch
+      - SPRING_DATASOURCE_USERNAME=shared
+      - SPRING_DATASOURCE_PASSWORD=shared
+      - S2S_BASE_URI=http://service-auth-provider-api:8489
+      - IDAM_API_BASE_URI=http://idam-api:5000
+      - OPEN_ID_API_BASE_URI=http://idam-api:5000/o
+      - ENABLE_LIQUIBASE=true
+      - APPINSIGHTS_INSTRUMENTATIONKEY=test-key
+      - DM_STORE_APP_URL=http://dm-store:8080
+      - DOCMOSIS_ACCESS_KEY=${DOCMOSIS_ACCESS_KEY}
+    dns:
+      - 172.16.0.10
+      - 172.16.0.14
+    depends_on:
+      - shared-database
+      - dm-store
+      - idam-api
+    ports:
+      - 4630:8080
+
+  dm-store:
+    image: hmctspublic.azurecr.io/dm/store:latest
+    container_name: ccdorc-dm-store
+    environment:
+      - SERVER_PORT=8080
+      - IDAM_SUPERUSER_EMAIL
+      - IDAM_SECRET_KEY=AAAAAAAAAAAAAAAA
+      - GOV_NOTIFY_API_KEY
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://shared-database:5432/evidence
+      - SPRING_DATASOURCE_USERNAME=shared
+      - SPRING_DATASOURCE_PASSWORD=shared
+      - SPRING_PROFILES_ACTIVE=dev
+      - ENABLE_AZURE_STORAGE_CONTAINER=true
+      - ENABLE_POSTGRES_BLOB_STORAGE=false
+      - STORAGEACCOUNT_PRIMARY_CONNECTION_STRING=DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azure-storage-emulator-azurite:10000/devstoreaccount1
+      - STORAGE_CONTAINER_DOCUMENT_CONTAINER_NAME=hmctstestcontainer
+      - BLOBSTORE_MIGRATE_CCD_PUBLIC_KEY_REQUIRED=false
+      - BLOBSTORE_MIGRATE_CCD_PUBLIC_KEY="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDiQ//gc/G53d9dLCtf123fIYo49gUySuJuxOcw2GtieWTMSy+O7RNtsAIjVf3mCOdDNuN69tZNPEWMdaW8n11s9MwYFahtxDecyn0KIP9MvPsfSMSbxhp/f7kfbdB/H/S5eYea66JTyeJS6uNd76RdHttx0mLO30ZkRcXB25c2SIXhRYsdoeKS5GXHDdNejkQM0S/Ev94x2UunApmYHjWN1XcDhsEsAeF4WHnvYh2XiMn9vHY44AqvbWLlAmCgzaXpz8Xhl0fO7jDKSeReDyuM3UTMaiFFaxuvliGol7aIXq/aVe/miiD2SLxHZ6RxAPW80bhXrzJMTLTCqhCEhzfv someone@somewhere.sometime"
+      - IDAM_TESTING_SUPPORT_ENABLED=true
+      - LOGGING_LEVEL_UK_GOV_HMCTS_IDAM=DEBUG
+      - IDAM_S2S_BASE_URI=http://service-auth-provider-api:8489
+      - S2S_NAMES_WHITELIST=em_npa_app,sscs,divorce,ccd,em_gw,ccd_gw,em_stitching_api,em_ccd_orchestrator
+      - http_proxy=
+      - https_proxy=
+      - no_proxy=
+      #      logging env vars
+      - JSON_CONSOLE_PRETTY_PRINT=false
+      - REFORM_SERVICE_TYPE=java
+      - REFORM_SERVICE_NAME=dm-store
+      - REFORM_TEAM=evidence
+      - REFORM_ENVIRONMENT=docker
+      #      healthcheck env vars
+      - PACKAGES_ENVIRONMENT=docker
+      - PACKAGES_PROJECT=evidence
+      - PACKAGES_NAME=dm-store
+      - PACKAGES_VERSION=unkown
+      #      debug mode
+      #- JAVA_TOOL_OPTIONS=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx512m -XX:MaxPermSize=512m
+    depends_on:
+      - shared-database
+      - service-auth-provider-api
+      - make-container-call
+    ports:
+      - 4603:8080
+
+  make-container-call:
+    image: byrnedo/alpine-curl
+    container_name: ccdorc-make-container-call
+    command: --retry 10 --retry-connrefused -XPUT --verbose http://azure-storage-emulator-azurite:10000/devstoreaccount1/hmctstestcontainer?restype=container
+    links:
+      - azure-storage-emulator-azurite
+    depends_on:
+      - azure-storage-emulator-azurite
+
+  azure-storage-emulator-azurite:
+    image: arafato/azurite
+    container_name: ccdorc-azure-storage-emulator-azurite
+    ports:
+      - 10000:10000
+    environment:
+      executable: "blob"
+    volumes:
+      - ccd-docker-azure-blob-data:/opt/azurite/folder
+
+  ccd-user-profile-api:
+    image: hmctspublic.azurecr.io/ccd/user-profile-api:latest
+    container_name: ccdorc-ccd-user-profile-api
+    environment:
+      USER_PROFILE_DB_HOST: shared-database
+      USER_PROFILE_DB_PORT: 5432
+      USER_PROFILE_DB_USERNAME: shared
+      USER_PROFILE_DB_PASSWORD: shared
+      USER_PROFILE_DB_USE_SSL: "false"
+      USER_PROFILE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_definition,ccd_admin
+      IDAM_S2S_URL: http://service-auth-provider-api:8489
+      REFORM_SERVICE_NAME: ccd-user-profile-api
+      REFORM_TEAM: ccd
+      REFORM_ENVIRONMENT: local
+      APPINSIGHTS_INSTRUMENTATIONKEY: key
+      JAVA_TOOL_OPTIONS: -Xms128m -Xmx512m -XX:MaxPermSize=512m
+    ports:
+      - 4453:4453
+    depends_on:
+      - shared-database
+      - service-auth-provider-api
+
+  ccd-definition-store-api:
+    image: hmctspublic.azurecr.io/ccd/definition-store-api:latest
+    container_name: ccdorc-ccd-definition-store-api
+    environment:
+      DEFINITION_STORE_DB_HOST: shared-database
+      DEFINITION_STORE_DB_PORT: 5432
+      DEFINITION_STORE_DB_USERNAME: shared
+      DEFINITION_STORE_DB_PASSWORD: shared
+      DEFINITION_STORE_DB_USE_SSL: "false"
+      DEFINITION_STORE_IDAM_KEY: AAAAAAAAAAAAAAAA
+      DEFINITION_STORE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_gw,ccd_admin
+      USER_PROFILE_HOST: http://ccd-user-profile-api:4453
+      IDAM_USER_URL: http://idam-api:5000
+      IDAM_S2S_URL: http://service-auth-provider-api:8489
+      REFORM_SERVICE_NAME: ccd-definition-store-api
+      REFORM_TEAM: ccd
+      REFORM_ENVIRONMENT: local
+      APPINSIGHTS_INSTRUMENTATIONKEY: key
+      ELASTIC_SEARCH_ENABLED: "false"
+      ELASTIC_SEARCH_HOST: "ccd-elasticsearch"
+      ELASTIC_SEARCH_FAIL_ON_IMPORT: "true"
+      JAVA_TOOL_OPTIONS: -Xms128m -Xmx512m -XX:MaxPermSize=512m
+    ports:
+      - 4451:4451
+    depends_on:
+      - shared-database
+      - ccd-user-profile-api
+      - idam-api
+      - service-auth-provider-api
+
+  ccd-data-store-api:
+    image: hmctspublic.azurecr.io/ccd/data-store-api:latest
+    container_name: ccdorc-ccd-data-store-api
+    environment:
+      DATA_STORE_DB_HOST: shared-database
+      DATA_STORE_DB_PORT: 5432
+      DATA_STORE_DB_USERNAME: shared
+      DATA_STORE_DB_PASSWORD: shared
+      DATA_STORE_DB_USE_SSL: "false"
+      DATA_STORE_IDAM_KEY: AAAAAAAAAAAAAAAA
+      DATA_STORE_TOKEN_SECRET: iuasbcuasdcbasdgcasdgcuysachjsacyasdgjcgasdj
+      DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,fpl_case_service,ccd_data,ccd_ps,em_ccd_orchestrator
+      DEFINITION_STORE_HOST: http://ccd-definition-store-api:4451
+      USER_PROFILE_HOST: http://ccd-user-profile-api:4453
+      IDAM_USER_URL: http://idam-api:5000
+      IDAM_S2S_URL: http://service-auth-provider-api:8489
+      REFORM_SERVICE_NAME: ccd-data-store-api
+      REFORM_TEAM: ccd
+      REFORM_ENVIRONMENT: local
+      APPINSIGHTS_INSTRUMENTATIONKEY: key
+      ELASTIC_SEARCH_ENABLED: "false"
+      ELASTIC_SEARCH_HOSTS: ccd-elasticsearch:9200
+      ELASTIC_SEARCH_DATA_NODES_HOSTS: "http://ccd-elasticsearch:9200"
+      CCD_DM_DOMAIN: http://dm-store:8080
+      JAVA_TOOL_OPTIONS: -Xms128m -Xmx512m -XX:MaxPermSize=512m
+    ports:
+      - 4452:4452
+    depends_on:
+      - shared-database
+      - ccd-user-profile-api
+      - ccd-definition-store-api
+      - idam-api
+      - service-auth-provider-api
+
+  ccd-case-management-web:
+    image: hmctspublic.azurecr.io/ccd/case-management-web:latest
+    container_name: ccdorc-ccd-case-management-web
+    environment:
+      IDAM_LOGIN_URL: http://localhost:9002/login
+      CCD_GATEWAY_BASE_URL: http://localhost:3453
+      CCD_ACTIVITY_BASE_URL:
+      DM_GATEWAY_BASE_URL: https://api-gateway.dev.dm.reform.hmcts.net
+      OAUTH2_CLIENT_ID: ccd_gateway
+      DM_URL: http://localhost:3453/documents
+      DM_URL_REMOTE: http://dm-store:8080/documents
+    ports:
+      - 3451:3451
+    depends_on:
+      - ccd-api-gateway
+
+  ccd-api-gateway:
+    image: hmctspublic.azurecr.io/ccd/api-gateway-web:latest
+    container_name: ccdorc-ccd-api-gateway
+    environment:
+      IDAM_BASE_URL: http://idam-api:5000
+      IDAM_USER_URL: http://idam-api:5000
+      IDAM_S2S_URL: http://service-auth-provider-api:8489
+      IDAM_SERVICE_KEY: AAAAAAAAAAAAAAAA
+      IDAM_OAUTH2_LOGOUT_ENDPOINT: http://idam-api:5000/session/:token
+      IDAM_OAUTH2_CLIENT_ID: ccd_gateway
+      IDAM_OAUTH2_CLIENT_SECRET: AAAAAAAAAAAAAAAA
+      IDAM_OAUTH2_TOKEN_ENDPOINT: http://idam-api:5000/oauth2/token
+      PROXY_DOCUMENT_MANAGEMENT: http://dm-store:8080
+      ADDRESS_LOOKUP_TOKEN:
+      PROXY_AGGREGATED: http://ccd-data-store-api:4452
+      PROXY_DATA: http://ccd-data-store-api:4452
+      PROXY_DEFINITION_IMPORT: http://ccd-definition-store-api:4451
+      PROXY_DEFINITION_DATA: http://ccd-definition-store-api:4451/api/data
+      PROXY_DEFINITION_DISPLAY: http://ccd-definition-store-api:4451/api/display
+      APPINSIGHTS_INSTRUMENTATIONKEY: key
+    ports:
+      - 3453:3453
+    depends_on:
+      - ccd-user-profile-api
+      - ccd-definition-store-api
+      - ccd-data-store-api
+      - dm-store
+
+volumes:
+  ccd-docker-azure-blob-data:
