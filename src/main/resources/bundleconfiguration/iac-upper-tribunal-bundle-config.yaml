@@ -1,0 +1,72 @@
+title: IAC Upper Tribunal Bundle
+filename: Upper-Tribunal-Bundle.pdf
+filenameIdentifier: /case_details/case_data/bundleFileNamePrefix
+coverpageTemplate: TB-IAC-GNO-ENG-00746.docx
+hasTableOfContents: true
+hasCoversheets: true
+documentNameValue: /document/document_filename
+documentLinkValue: /document
+sort:
+  field: /dateUploaded
+  order: ascending
+hasFolderCoversheets: true
+pageNumberFormat: numberOfPages
+folders:
+  - name: Appellant FTPA documents
+    documents:
+      - type: documentSet
+        property: /ftpaAppellantDocuments
+  - name: Respondent FTPA documents
+    documents:
+      - type: documentSet
+        property: /ftpaRespondentDocuments
+  - name: Decisions and reasons documents
+    documents:
+      - type: documentSet
+        property: /finalDecisionAndReasonsDocuments
+  - name: Hearing documents
+    documents:
+      - type: documentSet
+        property: /hearingDocuments
+        filters:
+          - property : /tag
+            value : caseSummary
+      - type: documentSet
+        property: /hearingDocuments
+        filters:
+          - property: /tag
+            value: hearingRequirements
+      - type: documentSet
+        property: /hearingDocuments
+        filters:
+          - property: /tag
+            value: hearingNotice
+  - name: Legal representative documents
+    documents:
+      - type: documentSet
+        property: /legalRepresentativeDocuments
+        filters:
+          - property: /tag
+            value: caseArgument
+      - type: documentSet
+        property: /legalRepresentativeDocuments
+        filters:
+          - property: /tag
+            value: appealSubmission
+  - name: Respondent documents
+    documents:
+      - type: documentSet
+        property: /respondentDocuments
+  - name: Additional evidence from appellant
+    documents:
+      - type: documentSet
+        property: /additionalEvidenceDocuments
+  - name: Appellant evidence after the hearing bundle
+    documents:
+      - type: documentSet
+        property: /appellantAddendumEvidenceDocs
+  - name: Respondent evidence after the hearing bundle
+    documents:
+      - type: documentSet
+        property: /respondentAddendumEvidenceDocs
+
